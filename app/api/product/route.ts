@@ -2,6 +2,7 @@ import axios from "axios";
 
 export async function GET(request: Request) {
   const token = process.env.X_LASTBRAIN_TOKEN;
+  console.log("X_LASTBRAIN_TOKEN:", token);
   const apiUrl = process.env.API_URL;
 
   if (!token || !apiUrl) {
@@ -17,6 +18,7 @@ export async function GET(request: Request) {
     const response = await axios.get(`${apiUrl}/api/product/list`, {
       headers: {
         "x-lastbrain-token": token,
+        origin: request.headers.get("origin") || "*",
       },
     });
 
