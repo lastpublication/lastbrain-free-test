@@ -2,8 +2,9 @@ import axios from "axios";
 
 export async function GET(request: Request) {
   const token = process.env.X_LASTBRAIN_TOKEN;
-  console.log("X_LASTBRAIN_TOKEN:", token);
+
   const apiUrl = process.env.API_URL;
+  const origin = request.headers.get("x-client-origin") || "*";
 
   if (!token || !apiUrl) {
     return new Response(JSON.stringify({ error: "Missing token or API URL" }), {
@@ -13,12 +14,11 @@ export async function GET(request: Request) {
       },
     });
   }
-
   try {
     const response = await axios.get(`${apiUrl}/api/product/list`, {
       headers: {
         "x-lastbrain-token": token,
-        origin: request.headers.get("origin") || "*",
+        origin: request.headers.get("referer")?.slice(0, -1),
       },
     });
 
@@ -29,8 +29,6 @@ export async function GET(request: Request) {
       },
     });
   } catch (error: any) {
-    console.error(error);
-
     return new Response(
       JSON.stringify({
         error: "Failed to fetch data",

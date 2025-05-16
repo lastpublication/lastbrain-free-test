@@ -29,18 +29,22 @@ export default function Home() {
       </h1>
 
       <div className="min-h-screen flex items-center justify-center ">
-        <div className="max-w5xl mx-auto p-4">
+        <div className="max-w-5xl mx-auto p-4">
           {!data && (
             <div className="flex items-center justify-center">
               <div className="h-5 w-5 bg-gray-700 rounded-full animate-ping"></div>
             </div>
           )}
           {data && (
-            <div className="flex gap-8">
+            <div className="grid grid-cols-2 gap-8">
               {data?.map((item: any) => (
                 <div key={item.id} className="p-8 border rounded">
-                  <h3 className="font-bold">{item.name}</h3>
-                  <p>{JSON.stringify(item)}</p>
+                  <h3 className="font-bold text-center text-3xl uppercase">
+                    {item.name}
+                  </h3>
+                  <pre className="text-sm text-gray-600 whitespace-pre-wrap break-words">
+                    {JSON.stringify(item, null, 2)}
+                  </pre>
                 </div>
               ))}
             </div>
