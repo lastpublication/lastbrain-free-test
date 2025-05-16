@@ -4,7 +4,6 @@ export async function GET(request: Request) {
   const token = process.env.X_LASTBRAIN_TOKEN;
 
   const apiUrl = process.env.API_URL;
-  const origin = request.headers.get("x-client-origin") || "*";
 
   if (!token || !apiUrl) {
     return new Response(JSON.stringify({ error: "Missing token or API URL" }), {
@@ -14,6 +13,8 @@ export async function GET(request: Request) {
       },
     });
   }
+  console.log(request.headers.get("referer")?.slice(0, -1));
+  console.log(token);
   try {
     const response = await axios.get(`${apiUrl}/api/product/list`, {
       headers: {
