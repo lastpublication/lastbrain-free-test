@@ -9,10 +9,9 @@ export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const amount = searchParams.get("amount") || "10"; // valeur par défaut 10
 
-  const origin =
-    request.headers.get("origin") ||
-    process.env.NEXT_PUBLIC_SITE_URL ||
-    "http://localhost:3000";
+  const origin = request.headers.get("referer")
+    ? new URL(request.headers.get("referer")!).origin
+    : undefined;
 
   const url_success = `${origin}/panier`;
   const url_cancel = `${origin}/panier`;
