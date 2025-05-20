@@ -36,10 +36,17 @@ export async function GET(request: Request) {
       },
     });
   } catch (error: any) {
+    console.log(error);
+    // Récupère le message d'erreur personnalisé si présent
+    const apiError =
+      error?.response?.data?.details?.message ||
+      error?.response?.data?.error ||
+      error?.message ||
+      "Failed to fetch data";
     return new Response(
       JSON.stringify({
-        error: "Failed to fetch data",
-        details: error?.response?.data || error.message,
+        error: apiError,
+        details: error?.response?.data,
       }),
       {
         status: error?.response?.status || 500,
