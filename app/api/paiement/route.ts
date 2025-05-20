@@ -1,4 +1,5 @@
 import axios from "axios";
+import { u } from "framer-motion/client";
 
 export async function GET(request: Request) {
   const token = process.env.X_LASTBRAIN_TOKEN;
@@ -7,7 +8,14 @@ export async function GET(request: Request) {
   // Récupérer le paramètre amount depuis l'URL
   const { searchParams } = new URL(request.url);
   const amount = searchParams.get("amount") || "10"; // valeur par défaut 10
-  console.log("🚀 ~ GET ~ amount:", amount);
+
+  const origin =
+    request.headers.get("origin") ||
+    process.env.NEXT_PUBLIC_SITE_URL ||
+    "http://localhost:3000";
+
+  const url_success = `${origin}/panier`;
+  const url_cancel = `${origin}/panier`;
 
   if (!token || !apiUrl) {
     return new Response(JSON.stringify({ error: "Missing token or API URL" }), {
@@ -21,7 +29,11 @@ export async function GET(request: Request) {
   try {
     const response = await axios.post(
       `${apiUrl}/api/payment/create`,
-      { amount },
+      {
+        amount,
+        url_success: url_success,
+        url_cancel: url_cancel,
+      },
       {
         headers: {
           "x-lastbrain-token": token,
