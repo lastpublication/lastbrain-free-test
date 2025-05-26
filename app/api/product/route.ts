@@ -19,7 +19,7 @@ export async function GET(request: Request) {
   }
 
   try {
-    const response = await axios.get(`${apiUrl}/api/product/list`, {
+    const response = await axios.get(`${apiUrl}/api/product`, {
       params: { page, limit },
       headers: {
         "x-lastbrain-token": token,
