@@ -60,9 +60,16 @@ export default function PanierPage() {
             {cart.map((item) => (
               <li
                 key={item.id}
-                className="py-4 flex justify-between items-center"
+                className="py-4 flex justify-between items-center dark:border-t-white/20"
               >
-                <div>
+                <div className="flex items-center gap-4">
+                  <div className="font-semibold">
+                    <img
+                      src={item.image}
+                      alt={item.name}
+                      className="w-16 h-16 object-cover rounded"
+                    />
+                  </div>
                   <div className="font-semibold">{item.name}</div>
                   <div className="text-sm text-gray-500">
                     {item.sale_price} €
@@ -79,7 +86,7 @@ export default function PanierPage() {
               </li>
             ))}
           </ul>
-          <div className="flex justify-between border-t pt-4">
+          <div className="flex justify-between border-t dark:border-t-white/20 pt-4">
             <span className="font-semibold">Total :</span>
             <span className="font-bold">
               {cart.reduce((acc, item) => acc + item.sale_price, 0).toFixed(2)}{" "}

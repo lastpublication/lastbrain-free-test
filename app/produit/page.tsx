@@ -1,5 +1,5 @@
 "use client";
-import { Button, Card, CardBody, Image, Spinner } from "@heroui/react";
+import { Button, Card, CardBody, Image, Link, Spinner } from "@heroui/react";
 import axios from "axios";
 import { TriangleAlertIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -80,10 +80,10 @@ export default function Page() {
         )}
         {data.length > 0 && (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {data.map((item: any) => (
+            {data.map((item: any, index: number) => (
               <Card
                 radius="sm"
-                key={item.id}
+                key={`${item.id} - ${index}`}
                 className="flex flex-col justify-between "
               >
                 <CardBody>
@@ -92,39 +92,37 @@ export default function Page() {
                     alt={item.name}
                     height={200}
                     width={700}
-                    className="w-full object-cover rounded-xl"
+                    className="w-full object-cover rounded-md mb-2"
                   />
                   <h3 className="text-xl font-bold uppercase mb-1 text-center">
                     {item.name}
                   </h3>
-                  <p className="text-center  mb-2">
+                  {item.code_product && (
+                    <p className="text-xs text-center text-black/70 dark:text-white/50">
+                      {item.code_product}
+                    </p>
+                  )}
+                  <p className="text-center  mb-2 truncate">
                     {item.description || "Aucune description."}
                   </p>
                   <div className="text-sm ">
                     <p>
-                      <strong>Prix d'achat :</strong> {item.purchase_price} €
-                    </p>
-                    <p>
-                      <strong>Prix de vente :</strong> {item.sale_price} €
-                    </p>
-                    <p>
                       <strong>Stock :</strong> {item.stock} {item.unit}
                     </p>
-                    <p>
-                      <strong>Code produit :</strong> {item.code_product}
+                    <p className="text-lg text-end  font-bold">
+                      {item.sale_price.toFixed(2)} €
                     </p>
-                    <p>
-                      <strong>Statut :</strong> {item.status}
-                    </p>
+
                     <Button
+                      as={Link}
                       isLoading={isLoading}
                       variant="solid"
                       color="success"
                       radius="none"
                       className="w-full mt-4"
-                      onPress={() => addToCart(item)}
+                      href={`/produit/${item.id}`}
                     >
-                      Ajouter au panier
+                      Voir le produit
                     </Button>
                   </div>
                 </CardBody>
@@ -138,8 +136,10 @@ export default function Page() {
           </div>
         )}
         {!hasMore && data.length > 0 && (
-          <div className="p-4 border rounded text-center mt-4">
-            <h3 className="font-bold">Plus de produits à charger.</h3>
+          <div className="p-4 border border-black/40 dark:border-white/40  rounded text-center mt-8">
+            <h3 className="font-bold text-black/30 dark:text-white/40">
+              Tous les produits chargés.
+            </h3>
           </div>
         )}
       </div>
