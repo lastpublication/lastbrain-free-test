@@ -32,10 +32,26 @@ export default function PanierPage() {
 
   const createPayment = () => {
     setIsLoading(true);
+    const first_name = "Test";
+    const last_name = "Client";
+    const customer_society = {
+      society: "Client Society",
+      last_name: last_name,
+      first_name: first_name,
+      name: `${first_name} ${last_name}`,
+      email: "client@test.com",
+      phone: "0123456789",
+      address: "123 Rue de Test",
+      city: "Testville",
+      zip_code: "75000",
+      country: "FR",
+    };
     axios
       .get("/api/paiement", {
         params: {
           amount: cart.reduce((acc, item) => acc + item.sale_price, 0),
+          cart: JSON.stringify(cart),
+          customer_society: JSON.stringify(customer_society),
         },
       })
       .then((res) => {
@@ -57,22 +73,30 @@ export default function PanierPage() {
       ) : (
         <>
           <ul className="divide-y">
-            {cart.map((item) => (
+            {cart.map((item, index) => (
               <li
-                key={item.id}
-                className="py-4 flex justify-between items-center dark:border-t-white/20"
+                key={`${item.id}-${index}`}
+                className="py-4 gap-4 flex justify-between items-center dark:border-t-white/20"
               >
-                <div className="flex items-center gap-4">
+                <div className="w-full flex items-center justify-between gap-4">
                   <div className="font-semibold">
-                    <img
-                      src={item.image}
-                      alt={item.name}
-                      className="w-16 h-16 object-cover rounded"
-                    />
+                    <div className="flex items-center gap-8">
+                      <img
+                        src={item.image}
+                        alt={item.name}
+                        className="w-16 h-16 object-cover rounded"
+                      />
+                      <div className="flex flex-col gap-1">
+                        <p className="font-semibold text-xl uppercase">
+                          {item.name}
+                        </p>
+                        <p className="text-xs text-gray-500">{item.ref}</p>
+                      </div>
+                    </div>
                   </div>
-                  <div className="font-semibold">{item.name}</div>
-                  <div className="text-sm text-gray-500">
-                    {item.sale_price} €
+
+                  <div className="text-md font-bold text-gray-500 text-end">
+                    {item.price_ttc} €
                   </div>
                 </div>
                 <Button
@@ -89,8 +113,7 @@ export default function PanierPage() {
           <div className="flex justify-between border-t dark:border-t-white/20 pt-4">
             <span className="font-semibold">Total :</span>
             <span className="font-bold">
-              {cart.reduce((acc, item) => acc + item.sale_price, 0).toFixed(2)}{" "}
-              €
+              {cart.reduce((acc, item) => acc + item.price_ttc, 0).toFixed(2)} €
             </span>
           </div>
           <div className="mt-8 flex justify-between">

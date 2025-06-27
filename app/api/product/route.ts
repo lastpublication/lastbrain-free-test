@@ -19,7 +19,6 @@ export async function GET(request: Request) {
   try {
     let response;
     if (id) {
-      console.log("Récupération d'un produit par ID", id);
       // Récupération d'un produit par ID
       response = await axios.get(`${apiUrl}/api/product`, {
         params: { id },
@@ -42,7 +41,6 @@ export async function GET(request: Request) {
         },
       });
     }
-    console.log(response.data);
 
     return new Response(JSON.stringify(response.data), {
       status: 200,
@@ -51,7 +49,6 @@ export async function GET(request: Request) {
       },
     });
   } catch (error: any) {
-    console.log(error);
     // Récupère le message d'erreur personnalisé si présent
     const apiError =
       error?.response?.data?.details?.message ||

@@ -25,7 +25,24 @@ export default function Page() {
   const addToCart = (item: any) => {
     const stored = localStorage.getItem("cart");
     const cart = stored ? JSON.parse(stored) : [];
-    cart.push(item);
+    cart.push({
+      name: item.name || null,
+      attributs_grouped: null,
+      image: item.image || null,
+      description: item.description || null,
+      price_ht:
+        item && item.sale_price && item.tax_rate
+          ? Number(
+              item.sale_price - item.sale_price / (1 + item.tax_rate / 100)
+            )
+          : item.sale_price,
+      price_ttc: item.sale_price || 0,
+      product_id: item.id || null,
+      quantity: 1,
+      rang: cart.length + 1,
+      ref: item.code_product || null,
+      tva_tx: item.tax_rate || 0,
+    });
     localStorage.setItem("cart", JSON.stringify(cart));
     window.dispatchEvent(new Event("cartUpdated"));
   };

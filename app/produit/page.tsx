@@ -25,7 +25,6 @@ export default function Page() {
       setHasMore(newData.length === 10);
       setError(null); // Réinitialise l’erreur si succès
     } catch (err: any) {
-      console.error(err);
       setHasMore(false);
       const apiError =
         err?.response?.data?.details?.message ||
