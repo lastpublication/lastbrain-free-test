@@ -7,18 +7,29 @@ import {
   NavbarBrand,
   NavbarContent,
 } from "@heroui/react";
-import { SwitchMode } from "./SwitchMode";
+import { ThemeSwitch } from "./SwitchMode";
 import { ShoppingCart } from "lucide-react";
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 
 export const NavbarComponent = () => {
   const [number, setNumber] = useState(0);
-
+  const router = useRouter();
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => {
+    setMounted(true);
+  }, []);
   useEffect(() => {
     const stored = localStorage.getItem("cart");
     if (stored) {
       try {
-        setNumber(JSON.parse(stored).length);
+        setNumber(
+          JSON.parse(stored).reduce(
+            (acc: number, item: { quantity: number }) =>
+              acc + (item.quantity || 1),
+            0
+          )
+        );
       } catch {
         setNumber(0);
       }
@@ -29,7 +40,14 @@ export const NavbarComponent = () => {
     // Optionnel : écoute le stockage pour MAJ en temps réel
     const onStorage = () => {
       const updated = localStorage.getItem("cart");
-      setNumber(updated ? JSON.parse(updated).length : 0);
+      if (!updated) return;
+      setNumber(
+        JSON.parse(updated).reduce(
+          (acc: number, item: { quantity: number }) =>
+            acc + (item.quantity || 1),
+          0
+        )
+      );
     };
     window.addEventListener("storage", onStorage);
     return () => window.removeEventListener("storage", onStorage);
@@ -38,7 +56,17 @@ export const NavbarComponent = () => {
   useEffect(() => {
     const updateNumber = () => {
       const stored = localStorage.getItem("cart");
-      setNumber(stored ? JSON.parse(stored).length : 0);
+      setNumber(
+        stored
+          ? Number(
+              JSON.parse(stored).reduce(
+                (acc: number, item: { quantity: number }) =>
+                  acc + (item.quantity || 1),
+                0
+              )
+            )
+          : 0
+      );
     };
 
     updateNumber();
@@ -51,15 +79,35 @@ export const NavbarComponent = () => {
       window.removeEventListener("storage", updateNumber);
     };
   }, []);
+
+  if (typeof window !== "undefined" && typeof window.btoa === "undefined") {
+    window.btoa = (str) => Buffer.from(str, "binary").toString("base64");
+  }
+
+  if (!mounted) return null;
+
   return (
-    <Navbar shouldHideOnScroll>
+    <Navbar shouldHideOnScroll className=" glass shadow-sm" position="sticky">
       <NavbarBrand>
-        <Link color="foreground" href="/">
+        <Link
+          color="foreground"
+          as={"button"}
+          onPress={() => {
+            router.push("/");
+          }}
+        >
           Hello LastBrain.
         </Link>
       </NavbarBrand>
       <NavbarContent className="hidden sm:flex gap-4" justify="center">
-        <Link href="/produit" color="foreground" underline="hover">
+        <Link
+          as={"button"}
+          onPress={() => {
+            router.push("/produit");
+          }}
+          color="foreground"
+          underline="hover"
+        >
           Produit
         </Link>
       </NavbarContent>
@@ -67,8 +115,9 @@ export const NavbarComponent = () => {
         {number > 0 ? (
           <Badge content={number} color="danger">
             <Button
-              as={Link}
-              href="/panier"
+              onPress={() => {
+                router.push("/panier");
+              }}
               variant="light"
               isIconOnly
               radius="full"
@@ -90,7 +139,7 @@ export const NavbarComponent = () => {
             <ShoppingCart size={24} />
           </Button>
         )}
-        <SwitchMode />
+        <ThemeSwitch />
       </NavbarContent>
     </Navbar>
   );

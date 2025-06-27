@@ -1,5 +1,5 @@
 "use client";
-import { Button } from "@heroui/react";
+import { Button, NumberInput } from "@heroui/react";
 import axios from "axios";
 import { CreditCard, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -9,11 +9,56 @@ export default function PanierPage() {
   const [cart, setCart] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
+  const [totalCartHT, setTotalCartHT] = useState(0);
+  const [totalCartTTC, setTotalCartTTC] = useState(0);
   // Charger le panier depuis le localStorage au montage
   useEffect(() => {
     const stored = localStorage.getItem("cart");
-    if (stored) setCart(JSON.parse(stored));
+    if (stored) {
+      setCart(JSON.parse(stored));
+      setTotalCartHT(
+        JSON.parse(stored)
+          .reduce(
+            (acc: number, item: any) => acc + item.price_ht * item.quantity,
+            0
+          )
+          .toFixed(2)
+      );
+      setTotalCartTTC(
+        JSON.parse(stored)
+          .reduce(
+            (acc: number, item: any) => acc + item.price_ttc * item.quantity,
+            0
+          )
+          .toFixed(2)
+      );
+    }
   }, []);
+
+  const refreshCart = () => {
+    const stored = localStorage.getItem("cart");
+    if (stored) {
+      const updatedCart = JSON.parse(stored);
+      setCart(updatedCart);
+      window.dispatchEvent(new Event("cartUpdated"));
+      setTotalCartHT(
+        updatedCart
+          .reduce(
+            (acc: number, item: any) => acc + item.price_ht * item.quantity,
+            0
+          )
+          .toFixed(2)
+      );
+      setTotalCartTTC(
+        updatedCart
+          .reduce(
+            (acc: number, item: any) => acc + item.price_ttc * item.quantity,
+            0
+          )
+          .toFixed(2)
+      );
+    }
+  };
 
   // Supprimer un produit du panier
   const removeFromCart = (id: string) => {
@@ -94,9 +139,24 @@ export default function PanierPage() {
                       </div>
                     </div>
                   </div>
-
+                  <div>
+                    <NumberInput
+                      value={item.quantity}
+                      min={1}
+                      onChange={(value) => {
+                        const updated = cart.map((cartItem) =>
+                          cartItem.id === item.id
+                            ? { ...cartItem, quantity: value }
+                            : cartItem
+                        );
+                        setCart(updated);
+                        localStorage.setItem("cart", JSON.stringify(updated));
+                        refreshCart();
+                      }}
+                    />
+                  </div>
                   <div className="text-md font-bold text-gray-500 text-end">
-                    {item.price_ttc} €
+                    {item.price_ttc.toFixed(2)} €
                   </div>
                 </div>
                 <Button
@@ -110,14 +170,35 @@ export default function PanierPage() {
               </li>
             ))}
           </ul>
-          <div className="flex justify-between border-t dark:border-t-white/20 pt-4">
-            <span className="font-semibold">Total :</span>
-            <span className="font-bold">
-              {cart.reduce((acc, item) => acc + item.price_ttc, 0).toFixed(2)} €
-            </span>
+
+          <div className="w-full  border-t dark:border-t-white/20 pt-4">
+            <div className="flex flex-col items-end">
+              {" "}
+              <div className="w-1/2 flex justify-between items-center gap-4">
+                <div className="font-thin text-end text-foreground-400">
+                  Total HT :
+                </div>
+                <div className=" text-end text-foreground-400">
+                  {totalCartHT} €
+                </div>
+              </div>
+              <div className="w-1/2 flex justify-between items-center gap-4">
+                <div className="font-thin text-end text-foreground-400">
+                  Total TVA :
+                </div>
+                <div className=" text-end text-foreground-400">
+                  {Number(totalCartTTC - totalCartHT).toFixed(2)} €
+                </div>
+              </div>
+              <div className="w-1/2 flex justify-between items-center gap-4">
+                <div className="font-semibold text-end">Total TTC :</div>
+                <div className="font-bold text-end">{totalCartTTC} €</div>
+              </div>
+            </div>
           </div>
-          <div className="mt-8 flex justify-between">
-            <Button color="danger" onPress={clearCart}>
+
+          <div className="mt-16 flex justify-between">
+            <Button color="danger" variant="light" onPress={clearCart}>
               <Trash2 size={16} />
               Vider le panier
             </Button>

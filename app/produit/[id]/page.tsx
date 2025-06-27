@@ -4,6 +4,7 @@ import { Button, ScrollShadow, Spinner } from "@heroui/react";
 import axios from "axios";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
+import { calculPriceTTC } from "../../utils/calculTva";
 
 export default function Page() {
   const params = useParams();
@@ -25,24 +26,33 @@ export default function Page() {
   const addToCart = (item: any) => {
     const stored = localStorage.getItem("cart");
     const cart = stored ? JSON.parse(stored) : [];
-    cart.push({
-      name: item.name || null,
-      attributs_grouped: null,
-      image: item.image || null,
-      description: item.description || null,
-      price_ht:
-        item && item.sale_price && item.tax_rate
-          ? Number(
-              item.sale_price - item.sale_price / (1 + item.tax_rate / 100)
-            )
-          : item.sale_price,
-      price_ttc: item.sale_price || 0,
-      product_id: item.id || null,
-      quantity: 1,
-      rang: cart.length + 1,
-      ref: item.code_product || null,
-      tva_tx: item.tax_rate || 0,
-    });
+
+    const existingItem = cart.find(
+      (cartItem: any) => cartItem.product_id === item.id
+    );
+    if (!existingItem) {
+      cart.push({
+        name: item.name || null,
+        attributs_grouped: null,
+        image: item.image || null,
+        description: item.description || null,
+        price_ht:
+          item && item.sale_price && item.tax_rate
+            ? Number(item.sale_price)
+            : item.sale_price,
+        price_ttc:
+          item && item.sale_price && item.tax_rate
+            ? calculPriceTTC(Number(item.sale_price), Number(item.tax_rate))
+            : item.sale_price,
+        product_id: item.id || null,
+        quantity: 1,
+        rang: cart.length + 1,
+        ref: item.code_product || null,
+        tva_tx: item.tax_rate || 0,
+      });
+    } else {
+      existingItem.quantity += 1;
+    }
     localStorage.setItem("cart", JSON.stringify(cart));
     window.dispatchEvent(new Event("cartUpdated"));
   };
@@ -91,7 +101,11 @@ export default function Page() {
         </ScrollShadow>
         <div className="flex items-center gap-4 mt-2">
           <span className="text-2xl font-semibold text-primary">
-            {product.sale_price} €
+            {calculPriceTTC(
+              Number(product.sale_price),
+              Number(product.tax_rate)
+            ).toFixed(2)}
+            €
           </span>
           <span className="text-xs text-gray-500">
             {product.stock > 0

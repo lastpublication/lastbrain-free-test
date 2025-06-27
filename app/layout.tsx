@@ -1,5 +1,8 @@
+import { Suspense } from "react";
 import "../styles/globals.css";
 import { NavbarComponent } from "./components/Navbar";
+
+import { Providers } from "./Providers";
 
 export const metadata = {
   title: "Next.js",
@@ -11,11 +14,18 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
+  if (typeof window !== "undefined" && typeof window.btoa === "undefined") {
+    return null;
+  }
   return (
     <html lang="en">
-      <body className="">
-        <NavbarComponent />
-        {children}
+      <body className="min-h-screen bg-background">
+        <Providers themeProps={{ attribute: "class", defaultTheme: "light" }}>
+          <Suspense fallback={<div>Loading...</div>}>
+            <NavbarComponent />
+            {children}
+          </Suspense>
+        </Providers>
       </body>
     </html>
   );

@@ -1,9 +1,18 @@
 "use client";
-import { Button, Card, CardBody, Image, Link, Spinner } from "@heroui/react";
+import {
+  Button,
+  Card,
+  CardBody,
+  Chip,
+  Image,
+  Link,
+  Spinner,
+} from "@heroui/react";
 import axios from "axios";
 import { TriangleAlertIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
+import { calculPriceTTC } from "../utils/calculTva";
 
 export default function Page() {
   const [data, setData] = useState<any[]>([]);
@@ -93,24 +102,30 @@ export default function Page() {
                     width={700}
                     className="w-full object-cover rounded-md mb-2"
                   />
-                  <h3 className="text-xl font-bold uppercase mb-1 text-center">
-                    {item.name}
-                  </h3>
+                  <div className="flex items-center justify-between ">
+                    <h3 className="text-xl font-bold uppercase mb-1">
+                      {item.name}
+                    </h3>
+                    <p className="text-lg text-end  font-bold">
+                      {calculPriceTTC(
+                        Number(item.sale_price),
+                        Number(item.tax_rate)
+                      ).toFixed(2)}
+                      €
+                    </p>
+                  </div>
                   {item.code_product && (
-                    <p className="text-xs text-center text-black/70 dark:text-white/50">
+                    <p className="text-xs  text-black/70 dark:text-white/50">
                       {item.code_product}
                     </p>
                   )}
-                  <p className="text-center  mb-2 truncate">
+                  <p className="  mb-2 truncate">
                     {item.description || "Aucune description."}
                   </p>
                   <div className="text-sm ">
-                    <p>
-                      <strong>Stock :</strong> {item.stock} {item.unit}
-                    </p>
-                    <p className="text-lg text-end  font-bold">
-                      {item.sale_price.toFixed(2)} €
-                    </p>
+                    <div className="text-end">
+                      <Chip> {item.stock} en stock</Chip>
+                    </div>
 
                     <Button
                       as={Link}
