@@ -6,6 +6,7 @@ import {
   CardFooter,
   Input,
   NumberInput,
+  Textarea,
 } from "@heroui/react";
 import axios from "axios";
 import { CreditCard, Trash2 } from "lucide-react";
@@ -32,6 +33,7 @@ export default function PanierPage() {
     city: "",
     zip_code: "",
     country: "FR",
+    note: "",
   });
   // Charger le panier depuis le localStorage au montage
   useEffect(() => {
@@ -386,6 +388,16 @@ export default function PanierPage() {
                             ""
                           }
                           value={values.zip_code}
+                          onChange={handleChange}
+                        />
+                      </div>
+                      <div className="col-span-2">
+                        <Textarea
+                          label="Commentaire"
+                          name="note"
+                          placeholder="Commentaire"
+                          className="input input-bordered w-full"
+                          value={values.note}
                           onChange={handleChange}
                         />
                       </div>

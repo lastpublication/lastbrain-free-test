@@ -77,7 +77,7 @@ export async function GET(request: Request) {
     ? JSON.parse(searchParams.get("cart")!)
     : [];
   const customer_society = JSON.parse(searchParams.get("customer_society")!);
-
+  const note = searchParams.get("note") || "";
   const origin = request.headers.get("referer")
     ? new URL(request.headers.get("referer")!).origin
     : undefined;
@@ -99,6 +99,7 @@ export async function GET(request: Request) {
       `${apiUrl}/api/payment/create`,
       {
         amount,
+        propal: { note },
         propal_det: cart.map((item: any, index: number) => ({
           attributs_grouped: item.attributs_grouped || null,
           description: item.description || null,
