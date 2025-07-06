@@ -1,10 +1,15 @@
-import React from "react";
+"use client";
+import React, { useEffect } from "react";
 import { CheckCircle2 } from "lucide-react";
 import Link from "next/link";
 
 export default function PaymentSuccessPage() {
+  useEffect(() => {
+    localStorage.removeItem("cart");
+    window.dispatchEvent(new Event("cartUpdated"));
+  }, []);
   return (
-    <main className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-green-50 via-white to-green-100 dark:from-green-900 dark:via-gray-950 dark:to-green-900">
+    <main className="absolute top-0 w-screen flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-green-50 via-white to-green-100 dark:from-green-900/40 dark:via-gray-950 dark:to-green-900/10">
       <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-xl p-10 flex flex-col items-center border border-green-100 dark:border-green-800">
         <CheckCircle2 className="text-green-500 mb-4" size={64} />
         <h1 className="text-3xl font-bold text-green-700 dark:text-green-300 mb-2">

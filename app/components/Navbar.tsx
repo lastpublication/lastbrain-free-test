@@ -10,6 +10,7 @@ import {
   NavbarMenu,
   NavbarMenuItem,
   NavbarMenuToggle,
+  Skeleton,
 } from "@heroui/react";
 import { ThemeSwitch } from "./SwitchMode";
 import { Home, ShoppingBag, ShoppingCart } from "lucide-react";
@@ -108,7 +109,7 @@ export const NavbarComponent = () => {
         className="sm:hidden"
       />
       <NavbarBrand>
-        {infoSociety && infoSociety.logo_url && infoSociety?.name && (
+        {infoSociety && infoSociety.logo_url && infoSociety?.name ? (
           <Link
             color="foreground"
             as={"button"}
@@ -129,6 +130,10 @@ export const NavbarComponent = () => {
               <>{infoSociety?.name || "Mon Entreprise"}</>
             )}
           </Link>
+        ) : (
+          <div>
+            <Skeleton className="h-8 w-24 rounded-full" />
+          </div>
         )}
       </NavbarBrand>
 

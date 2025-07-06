@@ -1,16 +1,38 @@
 "use client";
-import { Button, NumberInput } from "@heroui/react";
+import {
+  Button,
+  Card,
+  CardBody,
+  CardFooter,
+  Input,
+  NumberInput,
+} from "@heroui/react";
 import axios from "axios";
 import { CreditCard, Trash2 } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
+import { Formik, Form, Field, ErrorMessage } from "formik";
+import * as Yup from "yup";
 
 export default function PanierPage() {
   const [cart, setCart] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [totalCartHT, setTotalCartHT] = useState(0);
   const [totalCartTTC, setTotalCartTTC] = useState(0);
+  const [customerSociety, setCustomerSociety] = useState({
+    society: "",
+    last_name: "",
+    first_name: "",
+    name: "",
+    email: "",
+    phone: "",
+    address: "",
+    city: "",
+    zip_code: "",
+    country: "FR",
+  });
   // Charger le panier depuis le localStorage au montage
   useEffect(() => {
     const stored = localStorage.getItem("cart");
@@ -34,6 +56,15 @@ export default function PanierPage() {
       );
     }
   }, []);
+
+  useEffect(() => {
+    const success = searchParams.get("success");
+    if (success === "true") {
+      router.replace("/payment/success");
+    } else if (success === "false") {
+      router.replace("/payment/error");
+    }
+  }, [searchParams, router]);
 
   const refreshCart = () => {
     const stored = localStorage.getItem("cart");
@@ -75,21 +106,21 @@ export default function PanierPage() {
     window.dispatchEvent(new Event("cartUpdated"));
   };
 
-  const createPayment = () => {
+  const validationSchema = Yup.object({
+    last_name: Yup.string().required("Nom requis"),
+    first_name: Yup.string().required("Prénom requis"),
+    email: Yup.string().email("Email invalide").required("Email requis"),
+    phone: Yup.string().required("Téléphone requis"),
+    address: Yup.string().required("Adresse requise"),
+    city: Yup.string().required("Ville requise"),
+    zip_code: Yup.string().required("Code postal requis"),
+  });
+
+  const createPayment = (values: typeof customerSociety) => {
     setIsLoading(true);
-    const first_name = "Test";
-    const last_name = "Client";
     const customer_society = {
-      society: "Client Society",
-      last_name: last_name,
-      first_name: first_name,
-      name: `${first_name} ${last_name}`,
-      email: "client@test.com",
-      phone: "0123456789",
-      address: "123 Rue de Test",
-      city: "Testville",
-      zip_code: "75000",
-      country: "FR",
+      ...values,
+      name: `${values.first_name} ${values.last_name}`,
     };
     axios
       .get("/api/paiement", {
@@ -113,6 +144,7 @@ export default function PanierPage() {
   return (
     <div className="max-w-2xl mx-auto p-6">
       <h1 className="text-2xl font-bold mb-6">Mon panier</h1>
+
       {cart.length === 0 ? (
         <p>Votre panier est vide.</p>
       ) : (
@@ -196,21 +228,185 @@ export default function PanierPage() {
               </div>
             </div>
           </div>
-
-          <div className="mt-16 flex justify-between">
-            <Button color="danger" variant="light" onPress={clearCart}>
-              <Trash2 size={16} />
-              Vider le panier
-            </Button>
-            <Button
-              isLoading={isLoading}
-              color="success"
-              onPress={() => createPayment()}
-            >
-              <CreditCard size={16} />
-              Payer
-            </Button>
-          </div>
+          <Card className="mt-6">
+            <CardBody className="p-5">
+              <Formik
+                initialValues={customerSociety}
+                validationSchema={validationSchema}
+                onSubmit={createPayment}
+                enableReinitialize
+              >
+                {({
+                  isValid,
+                  dirty,
+                  values,
+                  handleChange,
+                  isSubmitting,
+                  errors,
+                  touched,
+                  submitCount,
+                }) => (
+                  <Form className="mb-8 space-y-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="col-span-2">
+                        <Input
+                          label="Société"
+                          name="society"
+                          placeholder="Nom de la société"
+                          className="input input-bordered w-full"
+                          value={values.society}
+                          onChange={handleChange}
+                        />
+                      </div>
+                      <div>
+                        <Input
+                          label="Nom *"
+                          name="last_name"
+                          placeholder="Nom"
+                          className="input input-bordered w-full"
+                          isInvalid={Boolean(
+                            (touched.last_name || submitCount > 0) &&
+                              errors.last_name
+                          )}
+                          errorMessage={
+                            ((touched.last_name || submitCount > 0) &&
+                              errors.last_name) ||
+                            ""
+                          }
+                          value={values.last_name}
+                          onChange={handleChange}
+                        />
+                      </div>
+                      <div>
+                        <Input
+                          label="Prénom *"
+                          name="first_name"
+                          placeholder="Prénom"
+                          className="input input-bordered w-full"
+                          isInvalid={Boolean(
+                            (touched.first_name || submitCount > 0) &&
+                              errors.first_name
+                          )}
+                          errorMessage={
+                            ((touched.first_name || submitCount > 0) &&
+                              errors.first_name) ||
+                            ""
+                          }
+                          value={values.first_name}
+                          onChange={handleChange}
+                        />
+                      </div>
+                      <div>
+                        <Input
+                          label="Email *"
+                          name="email"
+                          type="email"
+                          placeholder="Email"
+                          className="input input-bordered w-full"
+                          isInvalid={Boolean(
+                            (touched.email || submitCount > 0) && errors.email
+                          )}
+                          errorMessage={
+                            ((touched.email || submitCount > 0) &&
+                              errors.email) ||
+                            ""
+                          }
+                          value={values.email}
+                          onChange={handleChange}
+                        />
+                      </div>
+                      <div>
+                        <Input
+                          label="Téléphone *"
+                          name="phone"
+                          placeholder="Téléphone"
+                          className="input input-bordered w-full"
+                          isInvalid={Boolean(
+                            (touched.phone || submitCount > 0) && errors.phone
+                          )}
+                          errorMessage={
+                            ((touched.phone || submitCount > 0) &&
+                              errors.phone) ||
+                            ""
+                          }
+                          value={values.phone}
+                          onChange={handleChange}
+                        />
+                      </div>
+                      <div className="col-span-2">
+                        <Input
+                          label="Adresse *"
+                          name="address"
+                          placeholder="Adresse"
+                          className="input input-bordered w-full"
+                          isInvalid={Boolean(
+                            (touched.address || submitCount > 0) &&
+                              errors.address
+                          )}
+                          errorMessage={
+                            ((touched.address || submitCount > 0) &&
+                              errors.address) ||
+                            ""
+                          }
+                          value={values.address}
+                          onChange={handleChange}
+                        />
+                      </div>
+                      <div>
+                        <Input
+                          label="Ville  *"
+                          name="city"
+                          placeholder="Ville"
+                          className="input input-bordered w-full"
+                          isInvalid={Boolean(
+                            (touched.city || submitCount > 0) && errors.city
+                          )}
+                          errorMessage={
+                            ((touched.city || submitCount > 0) &&
+                              errors.city) ||
+                            ""
+                          }
+                          value={values.city}
+                          onChange={handleChange}
+                        />
+                      </div>
+                      <div>
+                        <Input
+                          label="Code postal *"
+                          name="zip_code"
+                          placeholder="Code postal"
+                          className="input input-bordered w-full"
+                          isInvalid={Boolean(
+                            (touched.zip_code || submitCount > 0) &&
+                              errors.zip_code
+                          )}
+                          errorMessage={
+                            ((touched.zip_code || submitCount > 0) &&
+                              errors.zip_code) ||
+                            ""
+                          }
+                          value={values.zip_code}
+                          onChange={handleChange}
+                        />
+                      </div>
+                    </div>
+                    <div className="flex justify-end">
+                      <Button
+                        type="submit"
+                        color="success"
+                        className="w-full rounded-md"
+                        isLoading={isLoading}
+                        isDisabled={isSubmitting || cart.length === 0}
+                      >
+                        <CreditCard size={16} />
+                        Payer
+                      </Button>
+                    </div>
+                  </Form>
+                )}
+              </Formik>
+            </CardBody>
+          </Card>
         </>
       )}
     </div>
