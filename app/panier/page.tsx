@@ -22,7 +22,7 @@ export default function PanierPage() {
   const searchParams = useSearchParams();
   const [totalCartHT, setTotalCartHT] = useState(0);
   const [totalCartTTC, setTotalCartTTC] = useState(0);
-  const [customerSociety, setCustomerSociety] = useState({
+  const [customerSociety] = useState({
     society: "",
     last_name: "",
     first_name: "",
@@ -124,11 +124,13 @@ export default function PanierPage() {
       ...values,
       name: `${values.first_name} ${values.last_name}`,
     };
+    console.log("Customer Society:", customer_society.note);
     axios
       .get("/api/paiement", {
         params: {
           amount: cart.reduce((acc, item) => acc + item.sale_price, 0),
           cart: JSON.stringify(cart),
+          note: customerSociety.note,
           customer_society: JSON.stringify(customer_society),
         },
       })
