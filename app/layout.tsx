@@ -1,8 +1,8 @@
 import { Suspense } from "react";
 import "../styles/globals.css";
 import { NavbarComponent } from "./components/Navbar";
-
 import { Providers } from "./Providers";
+import { InfoSocietyProvider } from "./context/InfoSocietyContext";
 
 export const metadata = {
   title: "Next.js",
@@ -14,17 +14,16 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  if (typeof window !== "undefined" && typeof window.btoa === "undefined") {
-    return null;
-  }
   return (
-    <html lang="en">
+    <html suppressHydrationWarning lang="en">
       <body className="min-h-screen bg-background">
         <Providers themeProps={{ attribute: "class", defaultTheme: "light" }}>
-          <Suspense fallback={<div>Loading...</div>}>
-            <NavbarComponent />
-            {children}
-          </Suspense>
+          <InfoSocietyProvider>
+            <Suspense fallback={<div>Loading...</div>}>
+              <NavbarComponent />
+              {children}
+            </Suspense>
+          </InfoSocietyProvider>
         </Providers>
       </body>
     </html>

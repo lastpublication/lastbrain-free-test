@@ -49,6 +49,7 @@ export async function GET(request: Request) {
       },
     });
   } catch (error: any) {
+    console.log("Error fetching products:", error);
     // Récupère le message d'erreur personnalisé si présent
     const apiError =
       error?.response?.data?.details?.message ||

@@ -115,7 +115,8 @@ export default function Page() {
         </div>
         <div className="text-xs text-gray-400">SKU : {product.sku}</div>
         <Button
-          color="primary"
+          color="success"
+          radius="none"
           disabled={product.stock < 1}
           onPress={() => addToCart(product)}
         >

@@ -61,8 +61,8 @@ export default function PanierPage() {
   };
 
   // Supprimer un produit du panier
-  const removeFromCart = (id: string) => {
-    const updated = cart.filter((item) => item.id !== id);
+  const removeFromCart = (index: number) => {
+    const updated = cart.filter((item, i) => i !== index);
     setCart(updated);
     localStorage.setItem("cart", JSON.stringify(updated));
     window.dispatchEvent(new Event("cartUpdated"));
@@ -121,9 +121,9 @@ export default function PanierPage() {
             {cart.map((item, index) => (
               <li
                 key={`${item.id}-${index}`}
-                className="py-4 gap-4 flex justify-between items-center dark:border-t-white/20"
+                className="py-4 gap-4 flex  flex-col md:flex-row  justify-between items-center dark:border-t-white/20"
               >
-                <div className="w-full flex items-center justify-between gap-4">
+                <div className="w-full flex flex-col md:flex-row items-center justify-between gap-4">
                   <div className="font-semibold">
                     <div className="flex items-center gap-8">
                       <img
@@ -155,18 +155,18 @@ export default function PanierPage() {
                       }}
                     />
                   </div>
-                  <div className="text-md font-bold text-gray-500 text-end">
+                  <div className="text-md flex items-center gap-3 space-x-5 font-bold text-foreground text-end">
                     {item.price_ttc.toFixed(2)} €
+                    <Button
+                      isIconOnly
+                      variant="light"
+                      color="danger"
+                      onPress={() => removeFromCart(index)}
+                    >
+                      <Trash2 size={16} />
+                    </Button>
                   </div>
                 </div>
-                <Button
-                  isIconOnly
-                  variant="light"
-                  color="danger"
-                  onPress={() => removeFromCart(item.id)}
-                >
-                  <Trash2 size={16} />
-                </Button>
               </li>
             ))}
           </ul>

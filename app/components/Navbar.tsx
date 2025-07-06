@@ -6,15 +6,24 @@ import {
   Navbar,
   NavbarBrand,
   NavbarContent,
+  NavbarItem,
+  NavbarMenu,
+  NavbarMenuItem,
+  NavbarMenuToggle,
 } from "@heroui/react";
 import { ThemeSwitch } from "./SwitchMode";
-import { ShoppingCart } from "lucide-react";
+import { Home, ShoppingBag, ShoppingCart } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useInfoSociety } from "../context/InfoSocietyContext";
 
 export const NavbarComponent = () => {
+  const infoSociety = useInfoSociety();
+
   const [number, setNumber] = useState(0);
   const router = useRouter();
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+
   const [mounted, setMounted] = useState(false);
   useEffect(() => {
     setMounted(true);
@@ -87,33 +96,59 @@ export const NavbarComponent = () => {
   if (!mounted) return null;
 
   return (
-    <Navbar shouldHideOnScroll className=" glass shadow-sm" position="sticky">
+    <Navbar
+      isMenuOpen={isMenuOpen}
+      onMenuOpenChange={setIsMenuOpen}
+      shouldHideOnScroll
+      className=" glass shadow-sm"
+      position="sticky"
+    >
+      <NavbarMenuToggle
+        aria-label={isMenuOpen ? "Close menu" : "Open menu"}
+        className="sm:hidden"
+      />
       <NavbarBrand>
-        <Link
-          color="foreground"
-          as={"button"}
-          onPress={() => {
-            router.push("/");
-          }}
-        >
-          Hello LastBrain.
-        </Link>
+        {infoSociety && infoSociety.logo_url && infoSociety?.name && (
+          <Link
+            color="foreground"
+            as={"button"}
+            onPress={() => {
+              router.push("/");
+            }}
+          >
+            {infoSociety?.logo_url ? (
+              <>
+                <img
+                  src={infoSociety.logo_url}
+                  alt={infoSociety.name || "Mon Entreprise"}
+                  className="h-8"
+                />
+                {infoSociety?.name || "Mon Entreprise"}
+              </>
+            ) : (
+              <>{infoSociety?.name || "Mon Entreprise"}</>
+            )}
+          </Link>
+        )}
       </NavbarBrand>
+
       <NavbarContent className="hidden sm:flex gap-4" justify="center">
-        <Link
-          as={"button"}
-          onPress={() => {
-            router.push("/produit");
-          }}
-          color="foreground"
-          underline="hover"
-        >
-          Produit
-        </Link>
+        <NavbarItem>
+          <Link
+            as={"button"}
+            onPress={() => {
+              router.push("/produit");
+            }}
+            color="foreground"
+            underline="hover"
+          >
+            Produit
+          </Link>
+        </NavbarItem>
       </NavbarContent>
       <NavbarContent justify="end" className="gap-4">
         {number > 0 ? (
-          <Badge content={number} color="danger">
+          <Badge content={number} color="primary">
             <Button
               onPress={() => {
                 router.push("/panier");
@@ -141,6 +176,51 @@ export const NavbarComponent = () => {
         )}
         <ThemeSwitch />
       </NavbarContent>
+      <NavbarMenu className="pt-5 space-y-5">
+        <NavbarMenuItem>
+          <Link
+            className="w-full text-2xl"
+            as={"button"}
+            onPress={() => {
+              setIsMenuOpen(false);
+              router.push("/");
+            }}
+            color="foreground"
+          >
+            <Home size={24} className="me-5" />
+            Accueil
+          </Link>
+        </NavbarMenuItem>
+        <NavbarMenuItem>
+          <Link
+            className="w-full text-2xl"
+            as={"button"}
+            onPress={() => {
+              setIsMenuOpen(false);
+
+              router.push("/produit");
+            }}
+            color="foreground"
+          >
+            <ShoppingBag size={24} className="me-5" />
+            Produit
+          </Link>
+        </NavbarMenuItem>
+        <NavbarMenuItem>
+          <Link
+            className="w-full text-2xl"
+            as={"button"}
+            onPress={() => {
+              setIsMenuOpen(false);
+              router.push("/panier");
+            }}
+            color="foreground"
+          >
+            <ShoppingCart size={24} className="me-5" />
+            Panier
+          </Link>
+        </NavbarMenuItem>
+      </NavbarMenu>
     </Navbar>
   );
 };

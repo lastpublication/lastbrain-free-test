@@ -31,6 +31,13 @@ export default function Page() {
       });
       const newData = res.data || [];
       setData((prev) => [...prev, ...newData]);
+      setData((prev) => {
+        const merged = [...prev, ...newData];
+        return merged.filter(
+          (item, index, self) =>
+            index === self.findIndex((t) => t.id === item.id)
+        );
+      }); // Supprimer les doublons
       setHasMore(newData.length === 10);
       setError(null); // Réinitialise l’erreur si succès
     } catch (err: any) {
