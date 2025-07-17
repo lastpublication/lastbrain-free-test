@@ -30,6 +30,15 @@ export default function Home() {
     social_media = [],
   } = infoSociety;
 
+  if (!infoSociety) {
+    return (
+      <div className="flex h-screen items-center justify-center">
+        <p className="text-lg text-stone-600 dark:text-stone-300">
+          Aucune information disponible.
+        </p>
+      </div>
+    );
+  }
   return (
     <main
       className="absolute top-0 pt-12 w-screen min-h-screen bg-gradient-to-br from-stone-300 via-background to-stone-300 dark:from-stone-900 dark:via-stone-950 dark:to-back
