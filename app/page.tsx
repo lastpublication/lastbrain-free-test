@@ -111,7 +111,7 @@ export default function Home() {
             {phone || "-"}
           </div>
         </div>
-        {public_tags.length > 4 && (
+        {Array.isArray(public_tags) && public_tags.length > 4 && (
           <div className="mb-4 flex flex-wrap gap-2 justify-center sm:justify-start">
             {public_tags.slice(4, 12).map((tag: string) => (
               <span
@@ -128,7 +128,7 @@ export default function Home() {
             )}
           </div>
         )}
-        {social_media.length > 0 && (
+        {Array.isArray(social_media) && social_media.length > 0 && (
           <div className="flex gap-6 mt-6 justify-center sm:justify-start">
             {social_media.map((s: any) => (
               <a
