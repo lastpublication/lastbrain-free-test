@@ -110,7 +110,7 @@ export const NavbarComponent = () => {
       isMenuOpen={isMenuOpen}
       onMenuOpenChange={setIsMenuOpen}
       shouldHideOnScroll
-      className=" glass shadow-sm"
+      className=" glass shadow-none"
       position="sticky"
     >
       <NavbarMenuToggle
@@ -200,20 +200,36 @@ export const NavbarComponent = () => {
           </Button>
         )}
         {user && (
-          <Button
-            variant="light"
-            radius="full"
-            onPress={() => router.push("/private")}
-          >
-            <User2 size={24} className="text-foreground" />
-            {user.first_name} {user.last_name.slice(0, 1)}.
-          </Button>
+          <>
+            <Button
+              variant="light"
+              radius="full"
+              className="hidden md:flex"
+              onPress={() => router.push("/private")}
+            >
+              <User2 size={24} className="text-foreground" />
+              {user.first_name} {user.last_name.slice(0, 1)}.
+            </Button>
+            <Button
+              variant="light"
+              radius="full"
+              className="flex md:hidden"
+              isIconOnly
+              onPress={() => {
+                router.push("/private");
+                setIsMenuOpen(false);
+              }}
+            >
+              <User2 size={24} className="text-foreground" />
+            </Button>
+          </>
         )}
         {user && (
           <Button
             variant="light"
             radius="full"
             isIconOnly
+            className="hidden md:flex"
             onPress={() => {
               axios.post("/api/logout").then(() => {
                 localStorage.removeItem("cart");
@@ -257,20 +273,23 @@ export const NavbarComponent = () => {
             Produit
           </Link>
         </NavbarMenuItem>
-        <NavbarMenuItem>
-          <Link
-            className="w-full text-2xl"
-            as={"button"}
-            onPress={() => {
-              setIsMenuOpen(false);
-              router.push("/login");
-            }}
-            color="foreground"
-          >
-            <User2 size={24} className="me-5" />
-            Connexion
-          </Link>
-        </NavbarMenuItem>
+        {!user && (
+          <NavbarMenuItem>
+            <Link
+              className="w-full text-2xl"
+              as={"button"}
+              onPress={() => {
+                setIsMenuOpen(false);
+                router.push("/login");
+              }}
+              color="foreground"
+            >
+              <User2 size={24} className="me-5" />
+              Connexion
+            </Link>
+          </NavbarMenuItem>
+        )}
+
         <NavbarMenuItem>
           <Link
             className="w-full text-2xl"
@@ -285,6 +304,29 @@ export const NavbarComponent = () => {
             Panier
           </Link>
         </NavbarMenuItem>
+        {user && (
+          <>
+            <NavbarMenuItem>
+              <Link
+                className="mt-8 w-full text-2xl"
+                as={"button"}
+                onPress={() => {
+                  setIsMenuOpen(false);
+                  axios.post("/api/logout").then(() => {
+                    localStorage.removeItem("cart");
+                    router.push("/");
+                    setUser(null);
+                    window.localStorage.removeItem("user");
+                  });
+                }}
+                color="foreground"
+              >
+                <Power size={24} className="me-5" />
+                Déconnexion
+              </Link>
+            </NavbarMenuItem>
+          </>
+        )}
       </NavbarMenu>
     </Navbar>
   );

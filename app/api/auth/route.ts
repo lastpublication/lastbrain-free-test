@@ -26,7 +26,6 @@ export async function POST(request: Request) {
       },
     });
   } catch (error: any) {
-    console.log("Error during authentication:", error?.response?.data.message);
     return new Response(
       JSON.stringify({
         error: "Erreur lors de la connexion",

@@ -33,10 +33,10 @@ export async function middleware(req: NextRequest) {
       return NextResponse.next();
     } else {
       console.log("Authentication failed:", response.statusText);
-      return NextResponse.redirect(new URL("/login", req.url));
+      return NextResponse.redirect(new URL("/logout", req.url));
     }
   } catch (error) {
-    return NextResponse.redirect(new URL("/login", req.url));
+    return NextResponse.redirect(new URL("/logout", req.url));
   }
 }
 
