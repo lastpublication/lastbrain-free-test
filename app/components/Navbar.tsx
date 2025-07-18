@@ -13,14 +13,23 @@ import {
   Skeleton,
 } from "@heroui/react";
 import { ThemeSwitch } from "./SwitchMode";
-import { Home, ShoppingBag, ShoppingCart } from "lucide-react";
+import {
+  Home,
+  Power,
+  ShoppingBag,
+  ShoppingCart,
+  User,
+  User2,
+} from "lucide-react";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useInfoSociety } from "../context/InfoSocietyContext";
+import { useAuth } from "../context/AuthContext";
+import axios from "axios";
 
 export const NavbarComponent = () => {
   const infoSociety = useInfoSociety();
-
+  const { user, setUser } = useAuth();
   const [number, setNumber] = useState(0);
   const router = useRouter();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -152,6 +161,8 @@ export const NavbarComponent = () => {
         </NavbarItem>
       </NavbarContent>
       <NavbarContent justify="end" className="gap-4">
+        <ThemeSwitch />
+
         {number > 0 ? (
           <Badge content={number} color="primary" className="text-foreground">
             <Button
@@ -161,7 +172,6 @@ export const NavbarComponent = () => {
               variant="light"
               isIconOnly
               radius="full"
-              color="primary"
             >
               <ShoppingCart size={24} />
             </Button>
@@ -179,7 +189,43 @@ export const NavbarComponent = () => {
             <ShoppingCart size={24} />
           </Button>
         )}
-        <ThemeSwitch />
+        {!user && (
+          <Button
+            variant="light"
+            isIconOnly
+            radius="full"
+            onPress={() => router.push("/login")}
+          >
+            <User2 size={24} className="text-foreground" />
+          </Button>
+        )}
+        {user && (
+          <Button
+            variant="light"
+            radius="full"
+            onPress={() => router.push("/private")}
+          >
+            <User2 size={24} className="text-foreground" />
+            {user.first_name} {user.last_name.slice(0, 1)}.
+          </Button>
+        )}
+        {user && (
+          <Button
+            variant="light"
+            radius="full"
+            isIconOnly
+            onPress={() => {
+              axios.post("/api/logout").then(() => {
+                localStorage.removeItem("cart");
+                router.push("/");
+                setUser(null);
+                window.localStorage.removeItem("user");
+              });
+            }}
+          >
+            <Power size={24} className="text-foreground" />
+          </Button>
+        )}
       </NavbarContent>
       <NavbarMenu className="pt-5 space-y-5">
         <NavbarMenuItem>
@@ -209,6 +255,20 @@ export const NavbarComponent = () => {
           >
             <ShoppingBag size={24} className="me-5" />
             Produit
+          </Link>
+        </NavbarMenuItem>
+        <NavbarMenuItem>
+          <Link
+            className="w-full text-2xl"
+            as={"button"}
+            onPress={() => {
+              setIsMenuOpen(false);
+              router.push("/login");
+            }}
+            color="foreground"
+          >
+            <User2 size={24} className="me-5" />
+            Connexion
           </Link>
         </NavbarMenuItem>
         <NavbarMenuItem>

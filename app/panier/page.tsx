@@ -16,6 +16,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
+import { LoginForm } from "../components/LoginForm";
 
 export default function PanierPage() {
   const [cart, setCart] = useState<any[]>([]);
@@ -240,6 +241,7 @@ export default function PanierPage() {
               </div>
             </div>
           </div>
+          <LoginForm />
           <Card className="my-6">
             <CardBody className="p-5">
               <Formik
@@ -260,157 +262,154 @@ export default function PanierPage() {
                 }) => (
                   <Form className=" space-y-4">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div className="col-span-2">
-                        <Input
-                          label="Société"
-                          name="society"
-                          placeholder="Nom de la société"
-                          className="input input-bordered w-full"
-                          value={values.society}
-                          onChange={handleChange}
-                        />
-                      </div>
-                      <div>
-                        <Input
-                          label="Nom *"
-                          name="last_name"
-                          placeholder="Nom"
-                          className="input input-bordered w-full"
-                          isInvalid={Boolean(
-                            (touched.last_name || submitCount > 0) &&
-                              errors.last_name
-                          )}
-                          errorMessage={
-                            ((touched.last_name || submitCount > 0) &&
-                              errors.last_name) ||
-                            ""
-                          }
-                          value={values.last_name}
-                          onChange={handleChange}
-                        />
-                      </div>
-                      <div>
-                        <Input
-                          label="Prénom *"
-                          name="first_name"
-                          placeholder="Prénom"
-                          className="input input-bordered w-full"
-                          isInvalid={Boolean(
-                            (touched.first_name || submitCount > 0) &&
-                              errors.first_name
-                          )}
-                          errorMessage={
-                            ((touched.first_name || submitCount > 0) &&
-                              errors.first_name) ||
-                            ""
-                          }
-                          value={values.first_name}
-                          onChange={handleChange}
-                        />
-                      </div>
-                      <div>
-                        <Input
-                          label="Email *"
-                          name="email"
-                          type="email"
-                          placeholder="Email"
-                          className="input input-bordered w-full"
-                          isInvalid={Boolean(
-                            (touched.email || submitCount > 0) && errors.email
-                          )}
-                          errorMessage={
-                            ((touched.email || submitCount > 0) &&
-                              errors.email) ||
-                            ""
-                          }
-                          value={values.email}
-                          onChange={handleChange}
-                        />
-                      </div>
-                      <div>
-                        <Input
-                          label="Téléphone *"
-                          name="phone"
-                          placeholder="Téléphone"
-                          className="input input-bordered w-full"
-                          isInvalid={Boolean(
-                            (touched.phone || submitCount > 0) && errors.phone
-                          )}
-                          errorMessage={
-                            ((touched.phone || submitCount > 0) &&
-                              errors.phone) ||
-                            ""
-                          }
-                          value={values.phone}
-                          onChange={handleChange}
-                        />
-                      </div>
-                      <div className="col-span-2">
-                        <Input
-                          label="Adresse *"
-                          name="address"
-                          placeholder="Adresse"
-                          className="input input-bordered w-full"
-                          isInvalid={Boolean(
-                            (touched.address || submitCount > 0) &&
-                              errors.address
-                          )}
-                          errorMessage={
-                            ((touched.address || submitCount > 0) &&
-                              errors.address) ||
-                            ""
-                          }
-                          value={values.address}
-                          onChange={handleChange}
-                        />
-                      </div>
-                      <div>
-                        <Input
-                          label="Ville  *"
-                          name="city"
-                          placeholder="Ville"
-                          className="input input-bordered w-full"
-                          isInvalid={Boolean(
-                            (touched.city || submitCount > 0) && errors.city
-                          )}
-                          errorMessage={
-                            ((touched.city || submitCount > 0) &&
-                              errors.city) ||
-                            ""
-                          }
-                          value={values.city}
-                          onChange={handleChange}
-                        />
-                      </div>
-                      <div>
-                        <Input
-                          label="Code postal *"
-                          name="zip_code"
-                          placeholder="Code postal"
-                          className="input input-bordered w-full"
-                          isInvalid={Boolean(
-                            (touched.zip_code || submitCount > 0) &&
-                              errors.zip_code
-                          )}
-                          errorMessage={
-                            ((touched.zip_code || submitCount > 0) &&
-                              errors.zip_code) ||
-                            ""
-                          }
-                          value={values.zip_code}
-                          onChange={handleChange}
-                        />
-                      </div>
-                      <div className="col-span-2">
-                        <Textarea
-                          label="Commentaire"
-                          name="note"
-                          placeholder="Commentaire"
-                          className="input input-bordered w-full"
-                          value={values.note}
-                          onChange={handleChange}
-                        />
-                      </div>
+                      <Input
+                        size="lg"
+                        label="Société"
+                        name="society"
+                        placeholder="Nom de la société"
+                        className="input input-bordered w-full col-span-2 md:col-span-1"
+                        value={values.society}
+                        onChange={handleChange}
+                      />
+
+                      <Input
+                        size="lg"
+                        label="Nom *"
+                        name="last_name"
+                        placeholder="Nom"
+                        className="input input-bordered w-full col-span-2 md:col-span-1"
+                        isInvalid={Boolean(
+                          (touched.last_name || submitCount > 0) &&
+                            errors.last_name
+                        )}
+                        errorMessage={
+                          ((touched.last_name || submitCount > 0) &&
+                            errors.last_name) ||
+                          ""
+                        }
+                        value={values.last_name}
+                        onChange={handleChange}
+                      />
+
+                      <Input
+                        size="lg"
+                        label="Prénom *"
+                        name="first_name"
+                        placeholder="Prénom"
+                        className="input input-bordered w-full col-span-2 md:col-span-1"
+                        isInvalid={Boolean(
+                          (touched.first_name || submitCount > 0) &&
+                            errors.first_name
+                        )}
+                        errorMessage={
+                          ((touched.first_name || submitCount > 0) &&
+                            errors.first_name) ||
+                          ""
+                        }
+                        value={values.first_name}
+                        onChange={handleChange}
+                      />
+
+                      <Input
+                        size="lg"
+                        label="Email *"
+                        name="email"
+                        type="email"
+                        placeholder="Email"
+                        className="input input-bordered w-full col-span-2 md:col-span-1"
+                        isInvalid={Boolean(
+                          (touched.email || submitCount > 0) && errors.email
+                        )}
+                        errorMessage={
+                          ((touched.email || submitCount > 0) &&
+                            errors.email) ||
+                          ""
+                        }
+                        value={values.email}
+                        onChange={handleChange}
+                      />
+
+                      <Input
+                        size="lg"
+                        label="Téléphone *"
+                        name="phone"
+                        placeholder="Téléphone"
+                        className="input input-bordered w-full col-span-2 md:col-span-1"
+                        isInvalid={Boolean(
+                          (touched.phone || submitCount > 0) && errors.phone
+                        )}
+                        errorMessage={
+                          ((touched.phone || submitCount > 0) &&
+                            errors.phone) ||
+                          ""
+                        }
+                        value={values.phone}
+                        onChange={handleChange}
+                      />
+
+                      <Input
+                        size="lg"
+                        label="Adresse *"
+                        name="address"
+                        placeholder="Adresse"
+                        className="input input-bordered w-full col-span-2 md:col-span-1"
+                        isInvalid={Boolean(
+                          (touched.address || submitCount > 0) && errors.address
+                        )}
+                        errorMessage={
+                          ((touched.address || submitCount > 0) &&
+                            errors.address) ||
+                          ""
+                        }
+                        value={values.address}
+                        onChange={handleChange}
+                      />
+
+                      <Input
+                        size="lg"
+                        label="Ville  *"
+                        name="city"
+                        placeholder="Ville"
+                        className="input input-bordered w-full col-span-2 md:col-span-1"
+                        isInvalid={Boolean(
+                          (touched.city || submitCount > 0) && errors.city
+                        )}
+                        errorMessage={
+                          ((touched.city || submitCount > 0) && errors.city) ||
+                          ""
+                        }
+                        value={values.city}
+                        onChange={handleChange}
+                      />
+
+                      <Input
+                        size="lg"
+                        label="Code postal *"
+                        name="zip_code"
+                        placeholder="Code postal"
+                        className="input input-bordered w-full col-span-2 md:col-span-1"
+                        isInvalid={Boolean(
+                          (touched.zip_code || submitCount > 0) &&
+                            errors.zip_code
+                        )}
+                        errorMessage={
+                          ((touched.zip_code || submitCount > 0) &&
+                            errors.zip_code) ||
+                          ""
+                        }
+                        value={values.zip_code}
+                        onChange={handleChange}
+                      />
+
+                      <Textarea
+                        size="lg"
+                        label="Commentaire"
+                        name="note"
+                        placeholder="Commentaire"
+                        className="input input-bordered w-full col-span-2 md:col-span-2"
+                        value={values.note}
+                        onChange={handleChange}
+                      />
                     </div>
                     <div className="flex justify-end">
                       <Button

@@ -3,6 +3,7 @@ import "../styles/globals.css";
 import { NavbarComponent } from "./components/Navbar";
 import { Providers } from "./Providers";
 import { InfoSocietyProvider } from "./context/InfoSocietyContext";
+import { AuthProvider } from "./context/AuthContext";
 
 export const metadata = {
   title: "Next.js",
@@ -17,14 +18,16 @@ export default function RootLayout({
   return (
     <html suppressHydrationWarning lang="en">
       <body className="min-h-screen bg-background">
-        <Providers themeProps={{ attribute: "class", defaultTheme: "light" }}>
-          <InfoSocietyProvider>
-            <Suspense fallback={<div>Loading...</div>}>
-              <NavbarComponent />
-              {children}
-            </Suspense>
-          </InfoSocietyProvider>
-        </Providers>
+        <InfoSocietyProvider>
+          <Providers themeProps={{ attribute: "class", defaultTheme: "light" }}>
+            <AuthProvider>
+              <Suspense fallback={<div>Loading...</div>}>
+                <NavbarComponent />
+                {children}
+              </Suspense>
+            </AuthProvider>
+          </Providers>
+        </InfoSocietyProvider>
       </body>
     </html>
   );
