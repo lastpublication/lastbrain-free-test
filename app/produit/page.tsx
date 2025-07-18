@@ -30,6 +30,7 @@ export default function Page() {
         params: { page, limit: 10 },
       });
       const newData = res.data || [];
+      console.log("Fetched data:", newData);
       setData((prev) => [...prev, ...newData]);
       setData((prev) => {
         const merged = [...prev, ...newData];
@@ -123,16 +124,18 @@ export default function Page() {
                   </div>
                   {item.code_product && (
                     <p className="text-xs  text-black/70 dark:text-white/50">
-                      {item.code_product}
+                      {item.code_product || ""}
                     </p>
                   )}
-                  <p className="  mb-2 truncate">
-                    {item.description || "Aucune description."}
-                  </p>
+                  {item.description && (
+                    <p className="  mb-2 truncate">{item.description}</p>
+                  )}
                   <div className="text-sm ">
-                    <div className="text-end">
-                      <Chip> {item.stock} en stock</Chip>
-                    </div>
+                    {item.stock > 0 && (
+                      <div className="text-end">
+                        <Chip> {item.stock} en stock</Chip>
+                      </div>
+                    )}
 
                     <Button
                       as={Link}
@@ -141,7 +144,7 @@ export default function Page() {
                       color="success"
                       radius="none"
                       className="w-full mt-4"
-                      href={`/produit/${item.id}`}
+                      href={`/produit/${item.code_product}`}
                     >
                       Voir le produit
                     </Button>
@@ -154,6 +157,11 @@ export default function Page() {
         {loading && (
           <div className="flex mt-[40vh] justify-center my-8">
             <Spinner color="default" />
+          </div>
+        )}
+        {data.length === 0 && !loading && (
+          <div className="flex mt-[40vh] justify-center my-8">
+            <p className="text-gray-500">Aucun produit trouvé.</p>
           </div>
         )}
         {!hasMore && data.length > 0 && (

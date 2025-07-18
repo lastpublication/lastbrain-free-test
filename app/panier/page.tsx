@@ -4,7 +4,9 @@ import {
   Card,
   CardBody,
   CardFooter,
+  Image,
   Input,
+  Link,
   NumberInput,
   Textarea,
 } from "@heroui/react";
@@ -162,17 +164,23 @@ export default function PanierPage() {
                 <div className="w-full flex flex-col md:flex-row items-center justify-between gap-4">
                   <div className="font-semibold">
                     <div className="flex items-center gap-8">
-                      <img
-                        src={item.image}
-                        alt={item.name}
-                        className="w-16 h-16 object-cover rounded"
-                      />
-                      <div className="flex flex-col gap-1">
-                        <p className="font-semibold text-xl uppercase">
-                          {item.name}
-                        </p>
-                        <p className="text-xs text-gray-500">{item.ref}</p>
-                      </div>
+                      <Link
+                        href={`/produit/${item.code_product}`}
+                        className="flex-shrink-0"
+                      >
+                        <Image
+                          src={item.image}
+                          alt={item.name}
+                          loading="lazy"
+                          className="w-16 h-16 object-cover rounded"
+                        />
+                        <div className="flex flex-col gap-1">
+                          <p className="font-semibold text-xl uppercase">
+                            {item.name}
+                          </p>
+                          <p className="text-xs text-gray-500">{item.ref}</p>
+                        </div>
+                      </Link>
                     </div>
                   </div>
                   <div>
@@ -232,7 +240,7 @@ export default function PanierPage() {
               </div>
             </div>
           </div>
-          <Card className="mt-6">
+          <Card className="my-6">
             <CardBody className="p-5">
               <Formik
                 initialValues={customerSociety}
@@ -250,7 +258,7 @@ export default function PanierPage() {
                   touched,
                   submitCount,
                 }) => (
-                  <Form className="mb-8 space-y-4">
+                  <Form className=" space-y-4">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div className="col-span-2">
                         <Input
@@ -410,6 +418,7 @@ export default function PanierPage() {
                         color="success"
                         className="w-full rounded-md"
                         isLoading={isLoading}
+                        size="lg"
                         isDisabled={isSubmitting || cart.length === 0}
                       >
                         <CreditCard size={16} />

@@ -153,7 +153,7 @@ export const NavbarComponent = () => {
       </NavbarContent>
       <NavbarContent justify="end" className="gap-4">
         {number > 0 ? (
-          <Badge content={number} color="primary">
+          <Badge content={number} color="primary" className="text-foreground">
             <Button
               onPress={() => {
                 router.push("/panier");

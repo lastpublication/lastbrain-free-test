@@ -5,7 +5,7 @@ export async function GET(request: Request) {
   const apiUrl = process.env.API_URL;
 
   const { searchParams } = new URL(request.url);
-  const id = searchParams.get("id");
+  const code_product = searchParams.get("code_product");
   const page = searchParams.get("page") || "1";
   const limit = searchParams.get("limit") || "10";
   if (!token || !apiUrl) {
@@ -18,10 +18,13 @@ export async function GET(request: Request) {
   }
   try {
     let response;
-    if (id) {
+    if (code_product) {
       // Récupération d'un produit par ID
       response = await axios.get(`${apiUrl}/api/product`, {
-        params: { id },
+        params: {
+          filter: `code_product=${code_product},status=active`,
+          limit: 1,
+        },
         headers: {
           "x-lastbrain-token": token,
           origin: request.headers.get("referer")
@@ -29,6 +32,8 @@ export async function GET(request: Request) {
             : undefined,
         },
       });
+
+      response = response.data[0] || null;
     } else {
       // Récupération paginée
       response = await axios.get(`${apiUrl}/api/product`, {
@@ -40,9 +45,10 @@ export async function GET(request: Request) {
             : undefined,
         },
       });
+      response = response.data;
     }
 
-    return new Response(JSON.stringify(response.data), {
+    return new Response(JSON.stringify(response), {
       status: 200,
       headers: {
         "Content-Type": "application/json",
