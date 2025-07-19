@@ -4,6 +4,7 @@ import { NavbarComponent } from "./components/Navbar";
 import { Providers } from "./Providers";
 import { InfoSocietyProvider } from "./context/InfoSocietyContext";
 import { AuthProvider } from "./context/AuthContext";
+import { TriangleAlert } from "lucide-react";
 
 export const metadata = {
   title: "Next.js",
@@ -15,6 +16,7 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
+  const isDemo = process.env.NEXT_PUBLIC_DEMO === "true";
   return (
     <html suppressHydrationWarning lang="en">
       <body className="min-h-screen bg-background">
@@ -22,6 +24,12 @@ export default function RootLayout({
           <Providers themeProps={{ attribute: "class", defaultTheme: "light" }}>
             <AuthProvider>
               <Suspense fallback={<div>Loading...</div>}>
+                {isDemo && (
+                  <div className="w-screen relative top-0 h-10 bg-danger z-50 flex items-center justify-center text-white text-sm uppercase gap-5">
+                    <TriangleAlert size={24} />
+                    {"Demo Mode"}
+                  </div>
+                )}
                 <NavbarComponent />
                 {children}
               </Suspense>

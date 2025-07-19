@@ -74,6 +74,7 @@ export const Avatar = ({
             {imageUrl ? (
               <Image
                 alt="Avatar"
+                radius="full"
                 className="w-[128px] h-[128px] border rounded-full object-cover"
                 src={`${imageUrl}?t=${Date.now()}`} // Cache busting
               />
@@ -87,7 +88,7 @@ export const Avatar = ({
           </>
         )}
 
-        <label className="absolute z-10 top-1/2 bg-black/90 background left-1/2 border p-2 rounded-full cursor-pointer  opacity-0 group-hover:opacity-100 transition-opacity">
+        <label className="absolute z-10 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-white  bg-black/90 border p-2 rounded-full cursor-pointer opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
           <input
             accept="image/*"
             className="hidden"

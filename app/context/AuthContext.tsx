@@ -1,5 +1,5 @@
 "use client";
-import React, { createContext, useContext, useState } from "react";
+import React, { createContext, useContext, useRef, useState } from "react";
 
 export const AuthContext = createContext<any>(null);
 
@@ -15,6 +15,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
     return null;
   });
+  const isDemo = process.env.NEXT_PUBLIC_DEMO === "true";
 
   // Met à jour le localStorage à chaque changement de user
   React.useEffect(() => {
@@ -26,7 +27,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [user]);
 
   return (
-    <AuthContext.Provider value={{ user, setUser }}>
+    <AuthContext.Provider value={{ user, setUser, isDemo }}>
       {children}
     </AuthContext.Provider>
   );

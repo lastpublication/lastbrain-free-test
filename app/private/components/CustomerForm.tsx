@@ -12,6 +12,7 @@ import {
 import { useEffect } from "react";
 import axios from "axios";
 import { Avatar } from "./Avatar";
+import { Ban } from "lucide-react";
 
 const initialValues = {
   siret: "",
@@ -70,7 +71,7 @@ export default function CustomerForm({
     );
   }
   return (
-    <Card className="w-full mt-5 p-2 md:p-8">
+    <Card className="w-full  p-2 md:p-8">
       <CardBody>
         <Formik
           initialValues={customer}
@@ -112,6 +113,7 @@ export default function CustomerForm({
                 label="Code client"
                 value={values.code_client}
                 onChange={handleChange}
+                endContent={<Ban size={24} className="text-primary" />}
                 errorMessage={
                   touched.code_client && errors.code_client
                     ? errors.code_client
@@ -124,12 +126,14 @@ export default function CustomerForm({
                 className="cursor-not-allowed"
                 label="Email"
                 value={values.email}
+                endContent={<Ban size={24} className="text-primary" />}
                 onChange={handleChange}
                 errorMessage={touched.email && errors.email ? errors.email : ""}
               />
               <Input
                 name="society"
                 label="Société"
+                endContent={<Ban size={24} className="text-primary" />}
                 readOnly
                 className="cursor-not-allowed"
                 value={values.society}
@@ -161,14 +165,14 @@ export default function CustomerForm({
               <Input
                 name="phone"
                 label="Téléphone"
-                value={values.phone}
+                value={values.phone ?? ""}
                 onChange={handleChange}
                 errorMessage={touched.phone && errors.phone ? errors.phone : ""}
               />
               <Input
                 name="address"
                 label="Adresse"
-                value={values.address}
+                value={values.address ?? ""}
                 onChange={handleChange}
                 errorMessage={
                   touched.address && errors.address ? errors.address : ""
@@ -177,7 +181,7 @@ export default function CustomerForm({
               <Input
                 name="zip_code"
                 label="Code postal"
-                value={values.zip_code}
+                value={values.zip_code ?? ""}
                 onChange={handleChange}
                 errorMessage={
                   touched.zip_code && errors.zip_code ? errors.zip_code : ""
@@ -186,14 +190,14 @@ export default function CustomerForm({
               <Input
                 name="city"
                 label="Ville"
-                value={values.city}
+                value={values.city ?? ""}
                 onChange={handleChange}
                 errorMessage={touched.city && errors.city ? errors.city : ""}
               />
               <Input
                 name="country"
                 label="Pays"
-                value={values.country}
+                value={values.country ?? ""}
                 onChange={handleChange}
                 errorMessage={
                   touched.country && errors.country ? errors.country : ""
@@ -203,14 +207,14 @@ export default function CustomerForm({
               <Input
                 name="siret"
                 label="SIRET"
-                value={values.siret}
+                value={values.siret ?? ""}
                 onChange={handleChange}
                 errorMessage={touched.siret && errors.siret ? errors.siret : ""}
               />
               <Input
                 name="vat_number"
                 label="Numéro TVA"
-                value={values.vat_number}
+                value={values.vat_number ?? ""}
                 onChange={handleChange}
                 errorMessage={
                   touched.vat_number && errors.vat_number
@@ -222,7 +226,7 @@ export default function CustomerForm({
               <Input
                 name="website"
                 label="Site web"
-                value={values.website}
+                value={values.website ?? ""}
                 onChange={handleChange}
                 errorMessage={
                   touched.website && errors.website ? errors.website : ""
@@ -231,7 +235,7 @@ export default function CustomerForm({
               <Input
                 name="industry"
                 label="Secteur"
-                value={values.industry}
+                value={values.industry ?? ""}
                 onChange={handleChange}
                 errorMessage={
                   touched.industry && errors.industry ? errors.industry : ""

@@ -6,10 +6,12 @@ import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { calculPriceTTC } from "../../utils/calculTva";
 import { Main } from "next/document";
+import { useAuth } from "../../context/AuthContext";
 
 export default function Page() {
   const params = useParams();
   const code_product = params.id as string;
+  const { isDemo } = useAuth();
   const [product, setProduct] = useState<any>(null);
   const [mainImage, setMainImage] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -156,10 +158,15 @@ export default function Page() {
         {product.sku && (
           <div className="text-xs text-gray-400">SKU : {product.sku}</div>
         )}
-
+        {isDemo && (
+          <div className="text-xs text-red-500">
+            Mode démo activé, impossible d'ajouter au panier.
+          </div>
+        )}
         {product.stock > 0 && (
           <Button
             color="success"
+            isDisabled={isDemo}
             radius="none"
             disabled={product.stock < 1}
             onPress={() => addToCart(product)}
@@ -171,6 +178,7 @@ export default function Page() {
           <Tooltip content=" Pas de stock ">
             <Button
               color="success"
+              isDisabled={isDemo}
               className="!opacity-40 !hover:opacity-40"
               radius="none"
               disabled={product.stock < 1}

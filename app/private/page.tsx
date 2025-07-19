@@ -5,6 +5,7 @@ import { Field, Form } from "formik";
 import { TriangleAlert } from "lucide-react";
 import { useEffect, useState } from "react";
 import CustomerForm from "./components/CustomerForm";
+import { ProjectTab } from "./components/ProjectTab";
 
 type CustomerFormType = {
   siret: string;
@@ -25,7 +26,9 @@ type CustomerFormType = {
   newsletter: boolean;
 };
 export default function Page() {
-  const [projects, setProjects] = useState<[] | null>(null);
+  const [projects, setProjects] = useState<any | null>(null);
+  const [invoices, setInvoices] = useState<[]>([]);
+  const [avoirs, setAvoirs] = useState<[]>([]);
   const [customer, setCustomer] = useState<CustomerFormType | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -34,15 +37,18 @@ export default function Page() {
     axios
       .get("/api/customer")
       .then((response) => {
-        console.log("successfully:", response.data);
         setProjects(response.data.projects || []);
         setCustomer(response.data.customer || []);
+        setInvoices(response.data.invoices || []);
+        setAvoirs(response.data.avoirs || []);
         console.log("customer:", response);
         setIsLoading(false);
       })
       .catch((error) => {
         setProjects([]);
+        setAvoirs([]);
         setCustomer(null);
+        setInvoices([]);
         setError(
           error.response.data.message || "Erreur lors de la récupération"
         );
@@ -76,11 +82,7 @@ export default function Page() {
     <div className="mt-8 w-full ">
       <Tabs aria-label="Options" className="flex justify-center" size="lg">
         <Tab key="profil" title="Profil">
-          <div className="w-full max-w-2xl mx-auto mt-5">
-            <h1 className="text-2xl font-thin text-center text-foreground/50">
-              Profil
-            </h1>
-
+          <div className="w-full max-w-2xl mx-auto mt-10">
             {customer && (
               <CustomerForm setCustomer={setCustomer} customer={customer} />
             )}
@@ -90,27 +92,35 @@ export default function Page() {
           contact
         </Tab>
         <Tab key="project" title="Project">
-          <Card className="w-full mt-5">
-            <CardBody>
-              Project
-              <pre>{JSON.stringify(projects, null, 2)}</pre>
-            </CardBody>
-          </Card>
+          <div className="w-full container mx-auto mt-10">
+            <ProjectTab
+              avoirs={avoirs}
+              invoices={invoices}
+              projects={projects}
+              setProjects={setProjects}
+            />
+          </div>
         </Tab>
         <Tab key="payment" title="Paiement">
-          <Card className="w-full mt-5">
-            <CardBody>Paiement</CardBody>
-          </Card>
+          <div className="w-full container mx-auto mt-10">
+            <Card className="w-full ">
+              <CardBody>Paiement</CardBody>
+            </Card>
+          </div>
         </Tab>
         <Tab key="stat" title="Stat">
-          <Card className="w-full mt-5">
-            <CardBody>Stat</CardBody>
-          </Card>
+          <div className="w-full container mx-auto mt-10">
+            <Card className="w-full">
+              <CardBody>Stat</CardBody>
+            </Card>
+          </div>
         </Tab>
         <Tab key="message" title="Message">
-          <Card className="w-full mt-5">
-            <CardBody>Message</CardBody>
-          </Card>
+          <div className="w-full container mx-auto mt-10">
+            <Card className="w-full">
+              <CardBody>Message</CardBody>
+            </Card>
+          </div>
         </Tab>
       </Tabs>
     </div>
