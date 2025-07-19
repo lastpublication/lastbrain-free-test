@@ -1,7 +1,6 @@
-import { addToast, Button, Image } from "@heroui/react";
-import { ArrowUpCircle, ImageOff, RefreshCcw } from "lucide-react";
-import { useState } from "react";
-import { useAuth } from "../../context/AuthContext";
+import { addToast, Image, Spinner } from "@heroui/react";
+import { ImageOff, RefreshCcw } from "lucide-react";
+import React, { useState } from "react";
 import axios from "axios";
 
 export const Avatar = ({
@@ -9,12 +8,12 @@ export const Avatar = ({
   upload,
   format = ["image/png", "image/jpeg", "image/jpg"],
 }: {
-  src: string;
+  src?: string | null;
   upload: (url: string) => void;
   format?: string[];
 }) => {
   const [isUploading, setIsUploading] = useState(false);
-  const { user } = useAuth();
+  const [imageUrl, setImageUrl] = useState<string | null>(src || null);
   const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
 
@@ -33,76 +32,71 @@ export const Avatar = ({
       return;
     }
 
-    if (!file || !user?.id) return;
+    if (!file) return;
 
     setIsUploading(true);
-    let cleanName = file.name.replace(/\s+/g, "_");
-
-    // Utilise l'id utilisateur comme nom de fichier, conserve l'extension d'origine
-    const ext = file.name.split(".").pop();
-
-    cleanName = ext ? `${user.id}.${ext}` : user.id;
-
-    const filePath = `avatars/customers/${cleanName}`;
 
     const formData = new FormData();
-    formData.append("file", file, cleanName);
-    formData.append("path", filePath);
-    formData.append("userId", user.id);
-    formData.append("type", "customer");
-    formData.append("format", format.join(","));
-    try {
-      const response = await axios.put("/api/upload", formData);
 
-      if (response.data.url) {
-        upload(response.data.url);
+    formData.append("file", file);
+
+    axios
+      .post("/api/upload", formData)
+      .then((response) => {
+        console.log("Upload response:", response.data.data);
+        setImageUrl(response.data.data.avatar);
+        upload(response.data.data.avatar);
+      })
+      .catch((error) => {
+        console.error("Upload error:", error);
         addToast({
-          title: "Succès",
-          description: "Avatar mis à jour avec succès.",
-          color: "success",
+          title: "Erreur",
+          description: "Échec de l'upload du fichier.",
+          color: "danger",
           timeout: 3000,
           shouldShowTimeoutProgress: true,
         });
-      } else {
-        throw new Error("URL de l'avatar non reçue");
-      }
-    } catch (error) {
-      console.error("Erreur lors de l'upload de l'avatar:", error);
-      addToast({
-        title: "Erreur",
-        description: "Échec de la mise à jour de l'avatar.",
-        color: "danger",
-        timeout: 3000,
-        shouldShowTimeoutProgress: true,
+      })
+      .finally(() => {
+        setIsUploading(false);
       });
-    } finally {
-      setIsUploading(false);
-    }
   };
+
   return (
-    <div className="flex items-center justify-center mb-8 group relative">
-      {src ? (
-        <Image
-          src={src}
-          alt="Avatar"
-          className="w-16 h-16 border rounded-full"
-        />
-      ) : (
-        <div className="w-24 h-24 border rounded-full bg-gray-200 flex items-center justify-center">
-          <span className="text-gray-500">
-            <ImageOff size={32} />
-          </span>
-        </div>
-      )}
-      <label className="absolute z-10 top-1/2 bg-black/90 background left-1/2 border p-2 rounded-full cursor-pointer  opacity-0 group-hover:opacity-100 transition-opacity">
-        <input
-          accept="image/*"
-          className="hidden"
-          type="file"
-          onChange={handleUpload}
-        />
-        <RefreshCcw size={24} className="" />
-      </label>
-    </div>
+    <>
+      <div className="flex items-center justify-center mb-8 group relative">
+        {isUploading ? (
+          <div className="h-[128px] w-[128px] mx-auto  inset-0 bg-black/10 rounded-full flex items-center justify-center z-20">
+            <Spinner aria-label="Loading" className="text-white" size="lg" />
+          </div>
+        ) : (
+          <>
+            {imageUrl ? (
+              <Image
+                alt="Avatar"
+                className="w-[128px] h-[128px] border rounded-full object-cover"
+                src={`${imageUrl}?t=${Date.now()}`} // Cache busting
+              />
+            ) : (
+              <div className="w-[128px] h-[128px] border rounded-full bg-foreground flex items-center justify-center">
+                <span className="text-gray-500">
+                  <ImageOff size={32} />
+                </span>
+              </div>
+            )}
+          </>
+        )}
+
+        <label className="absolute z-10 top-1/2 bg-black/90 background left-1/2 border p-2 rounded-full cursor-pointer  opacity-0 group-hover:opacity-100 transition-opacity">
+          <input
+            accept="image/*"
+            className="hidden"
+            type="file"
+            onChange={handleUpload}
+          />
+          <RefreshCcw className="" size={24} />
+        </label>
+      </div>
+    </>
   );
 };

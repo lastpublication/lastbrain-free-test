@@ -99,7 +99,10 @@ export default function CustomerForm({
             <Form className="flex flex-col gap-4">
               <Avatar
                 src={values.avatar}
-                upload={(url: string) => (values.avatar = url)}
+                upload={(url: string) => {
+                  console.log("Avatar uploaded:", url);
+                  values.avatar = url;
+                }}
               />
 
               <Input
