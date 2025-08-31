@@ -21,7 +21,6 @@ export async function GET(request: Request) {
       },
     });
   } catch (error: any) {
-    console.error(error);
     return new Response(
       JSON.stringify({
         error: "Erreur lors de l'appel à l'API externe",

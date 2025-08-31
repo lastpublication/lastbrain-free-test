@@ -17,14 +17,21 @@ export async function POST(request: Request) {
         },
       }
     );
+    console.log(response.data.profile);
 
-    return new Response(JSON.stringify(response.data.user), {
-      status: 200,
-      headers: {
-        "Content-Type": "application/json",
-        "Set-Cookie": `x-lastbrain-user-token=${response.data.token}; HttpOnly; Path=/; Secure; SameSite=Strict`,
-      },
-    });
+    return new Response(
+      JSON.stringify({
+        user: response.data.user,
+        profile: response.data.profile,
+      }),
+      {
+        status: 200,
+        headers: {
+          "Content-Type": "application/json",
+          "Set-Cookie": `x-lastbrain-user-token=${response.data.lastbrain_user_token}; HttpOnly; Path=/; Secure; SameSite=Strict`,
+        },
+      }
+    );
   } catch (error: any) {
     return new Response(
       JSON.stringify({

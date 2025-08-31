@@ -13,31 +13,32 @@ export async function middleware(req: NextRequest) {
       userToken = match[1];
     }
   }
-
+  console.log("User Token:", userToken); // Pour le débogage
   if (!userToken || !token) {
     return NextResponse.redirect(new URL("/login", req.url));
   }
 
-  // Utiliser fetch et await
-  try {
-    const response = await fetch(`${ApiUrl}/api/auth/customer`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "x-lastbrain-token": token,
-      },
-      body: JSON.stringify({ token: userToken }),
-    });
+  // // Utiliser fetch et await
+  // try {
+  //   const response = await fetch(`${ApiUrl}/api/auth/customer`, {
+  //     method: "POST",
+  //     headers: {
+  //       "Content-Type": "application/json",
+  //       "x-lastbrain-token": token,
+  //     },
+  //     body: JSON.stringify({ token: userToken }),
+  //   });
 
-    if (response.ok) {
-      return NextResponse.next();
-    } else {
-      console.log("Authentication failed:", response.statusText);
-      return NextResponse.redirect(new URL("/logout", req.url));
-    }
-  } catch (error) {
-    return NextResponse.redirect(new URL("/logout", req.url));
-  }
+  //   if (response.ok) {
+  //     return NextResponse.next();
+  //   } else {
+  //     console.log("Authentication failed:", response.statusText);
+  //     return NextResponse.redirect(new URL("/logout", req.url));
+  //   }
+  // } catch (error) {
+  //   return NextResponse.redirect(new URL("/logout", req.url));
+  // }
+  return NextResponse.next();
 }
 
 export const config = {

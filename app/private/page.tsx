@@ -6,6 +6,7 @@ import { TriangleAlert } from "lucide-react";
 import { useEffect, useState } from "react";
 import CustomerForm from "./components/CustomerForm";
 import { ProjectTab } from "./components/ProjectTab";
+import { useAuth } from "../context/AuthContext";
 
 type CustomerFormType = {
   siret: string;
@@ -26,6 +27,8 @@ type CustomerFormType = {
   newsletter: boolean;
 };
 export default function Page() {
+  const { setUser } = useAuth();
+
   const [projects, setProjects] = useState<any | null>(null);
   const [invoices, setInvoices] = useState<[]>([]);
   const [avoirs, setAvoirs] = useState<[]>([]);
@@ -37,11 +40,12 @@ export default function Page() {
     axios
       .get("/api/customer")
       .then((response) => {
+        setUser(response.data.profile || null);
         setProjects(response.data.projects || []);
-        setCustomer(response.data.customer || []);
+        setCustomer(response.data.profile || []);
         setInvoices(response.data.invoices || []);
         setAvoirs(response.data.avoirs || []);
-        console.log("customer:", response);
+
         setIsLoading(false);
       })
       .catch((error) => {
