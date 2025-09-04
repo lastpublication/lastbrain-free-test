@@ -3,13 +3,13 @@ import { Button, Card, CardBody, Input } from "@heroui/react";
 import axios from "axios";
 import { Form, Formik } from "formik";
 import { Triangle, TriangleAlert } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import * as Yup from "yup";
 import { useAuth } from "../context/AuthContext";
 import { useRouter } from "next/navigation";
 export const LoginForm = () => {
-  const { setUser } = useAuth();
+  const { user, setUser } = useAuth();
   const validationSchema = Yup.object({
     email: Yup.string().required("Email requis"),
     password: Yup.string().required("Mot de passe requis"),
@@ -46,6 +46,12 @@ export const LoginForm = () => {
       setIsLoading(false);
     }
   };
+
+  useEffect(() => {
+    if (user) {
+      router.push("/private");
+    }
+  }, [user]);
   return (
     <Card className="w-full mt-5">
       <CardBody className="flex flex-col items-center justify-center p-6">

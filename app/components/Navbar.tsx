@@ -208,7 +208,7 @@ export const NavbarComponent = () => {
               onPress={() => router.push("/private")}
             >
               <User2 size={24} className="text-foreground" />
-              {user.first_name} {user.last_name.slice(0, 1)}.
+              {user?.first_name || ""} {user?.last_name?.slice(0, 1) || ""}
             </Button>
             <Button
               variant="light"

@@ -40,7 +40,7 @@ export default function Page() {
     axios
       .get("/api/customer")
       .then((response) => {
-        setUser(response.data.profile || null);
+        // setUser(response.data.profile || null);
         setProjects(response.data.projects || []);
         setCustomer(response.data.profile || []);
         setInvoices(response.data.invoices || []);
