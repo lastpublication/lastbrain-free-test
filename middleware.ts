@@ -6,12 +6,16 @@ const DEFAULT_COOKIE_DAYS = 30;
 /** =========================
  * Helpers (Option A - token signé "aff")
  * ========================= */
-function b64urlToUint8Array(s: string) {
-  s = s.replace(/-/g, "+").replace(/_/g, "/");
-  const pad = s.length % 4 ? 4 - (s.length % 4) : 0;
-  const base64 = s + "=".repeat(pad);
-  const raw = Buffer.from(base64, "base64");
-  return new Uint8Array(raw);
+function b64urlDecodeToString(input: string) {
+  // Convert base64url -> base64
+  const b64 =
+    input.replace(/-/g, "+").replace(/_/g, "/") +
+    "===".slice((input.length + 3) % 4);
+  // atob works in Edge runtime
+  const binary = atob(b64);
+  const bytes = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+  return new TextDecoder().decode(bytes);
 }
 
 async function hmacSha256(secret: string, data: string) {
@@ -41,7 +45,7 @@ async function tryHandleAffToken(
     const [p64, sig] = aff.split(".");
     if (!p64 || !sig) throw new Error("bad token");
 
-    const payloadJson = Buffer.from(b64urlToUint8Array(p64)).toString("utf8");
+    const payloadJson = b64urlDecodeToString(p64);
     const expected = await hmacSha256(secret, p64);
     if (sig !== expected) throw new Error("bad signature");
 
