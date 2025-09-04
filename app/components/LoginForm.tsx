@@ -32,10 +32,11 @@ export const LoginForm = () => {
         withCredentials: true,
       });
       // Stocke l'utilisateur dans le localStorage
-      console.log(response.data);
+
       if (response.data.profile) {
         setUser(response.data.profile);
-        router.push("/private");
+        // router.push("/private");
+        router.refresh();
       }
     } catch (error: any) {
       setFieldError(

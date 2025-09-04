@@ -1,4 +1,5 @@
 import axios from "axios";
+import { cookies } from "next/headers";
 
 export type Json =
   | string
@@ -76,7 +77,7 @@ export async function GET(request: Request) {
   const cart = searchParams.get("cart")
     ? JSON.parse(searchParams.get("cart")!)
     : [];
-  const customer_society = JSON.parse(searchParams.get("customer_society")!);
+  const customer = JSON.parse(searchParams.get("customer")!);
   const note = searchParams.get("note") || "";
   const origin = request.headers.get("referer")
     ? new URL(request.headers.get("referer")!).origin
@@ -92,6 +93,27 @@ export async function GET(request: Request) {
         "Content-Type": "application/json",
       },
     });
+  }
+  const store = await cookies(); // ⬅️ on attend la Promise
+
+  // Récupération du cookie d'affiliation (posé par le SaaS lors du go/[code])
+  const rawAff = store.get("lb_aff")?.value;
+  let affiliate: any = null;
+  if (rawAff) {
+    try {
+      const parsed = JSON.parse(rawAff);
+      // Validation minimale et whitelisting des champs attendus
+      affiliate = {
+        owner_id: parsed?.owner_id ?? null,
+        link_id: parsed?.link_id ?? null,
+        product_id: parsed?.product_id ?? null,
+        affiliate_product_id: parsed?.affiliate_product_id ?? null,
+        at: parsed?.at ?? null,
+        v: parsed?.v ?? 1,
+      };
+    } catch (_e) {
+      affiliate = null;
+    }
   }
 
   try {
@@ -114,7 +136,8 @@ export async function GET(request: Request) {
           tva_tx: item.tva_tx || 0,
           user_create: item.user_create || "1",
         })),
-        customer_society,
+        affiliate,
+        customer,
         url_success: url_success,
         url_cancel: url_cancel,
       },

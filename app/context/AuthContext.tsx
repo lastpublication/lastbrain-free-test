@@ -22,7 +22,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (user) {
       localStorage.setItem("user", JSON.stringify(user));
     } else {
-      localStorage.removeItem("user");
+      // localStorage.removeItem("user");
     }
   }, [user]);
 

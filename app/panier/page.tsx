@@ -17,8 +17,10 @@ import { useEffect, useState } from "react";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import { LoginForm } from "../components/LoginForm";
+import { useAuth } from "../context/AuthContext";
 
 export default function PanierPage() {
+  const { user } = useAuth();
   const [cart, setCart] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
@@ -123,18 +125,18 @@ export default function PanierPage() {
 
   const createPayment = (values: typeof customerSociety) => {
     setIsLoading(true);
-    const customer_society = {
+    const customer = {
       ...values,
       name: `${values.first_name} ${values.last_name}`,
     };
-    console.log("Customer Society:", customer_society.note);
+    console.log("Customer Society:", customer.note);
     axios
       .get("/api/paiement", {
         params: {
           amount: cart.reduce((acc, item) => acc + item.sale_price, 0),
           cart: JSON.stringify(cart),
           note: customerSociety.note,
-          customer_society: JSON.stringify(customer_society),
+          customer: JSON.stringify(customer),
         },
       })
       .then((res) => {
@@ -241,194 +243,217 @@ export default function PanierPage() {
               </div>
             </div>
           </div>
-          <LoginForm />
-          <Card className="my-6">
-            <CardBody className="p-5">
-              <Formik
-                initialValues={customerSociety}
-                validationSchema={validationSchema}
-                onSubmit={createPayment}
-                enableReinitialize
+          {!user && (
+            <>
+              <LoginForm />
+              <Card className="my-6">
+                <CardBody className="p-5">
+                  <Formik
+                    initialValues={customerSociety}
+                    validationSchema={validationSchema}
+                    onSubmit={createPayment}
+                    enableReinitialize
+                  >
+                    {({
+                      isValid,
+                      dirty,
+                      values,
+                      handleChange,
+                      isSubmitting,
+                      errors,
+                      touched,
+                      submitCount,
+                    }) => (
+                      <Form className=" space-y-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <Input
+                            size="lg"
+                            label="Société"
+                            name="society"
+                            placeholder="Nom de la société"
+                            className="input input-bordered w-full col-span-2 md:col-span-1"
+                            value={values.society}
+                            onChange={handleChange}
+                          />
+
+                          <Input
+                            size="lg"
+                            label="Nom *"
+                            name="last_name"
+                            placeholder="Nom"
+                            className="input input-bordered w-full col-span-2 md:col-span-1"
+                            isInvalid={Boolean(
+                              (touched.last_name || submitCount > 0) &&
+                                errors.last_name
+                            )}
+                            errorMessage={
+                              ((touched.last_name || submitCount > 0) &&
+                                errors.last_name) ||
+                              ""
+                            }
+                            value={values.last_name}
+                            onChange={handleChange}
+                          />
+
+                          <Input
+                            size="lg"
+                            label="Prénom *"
+                            name="first_name"
+                            placeholder="Prénom"
+                            className="input input-bordered w-full col-span-2 md:col-span-1"
+                            isInvalid={Boolean(
+                              (touched.first_name || submitCount > 0) &&
+                                errors.first_name
+                            )}
+                            errorMessage={
+                              ((touched.first_name || submitCount > 0) &&
+                                errors.first_name) ||
+                              ""
+                            }
+                            value={values.first_name}
+                            onChange={handleChange}
+                          />
+
+                          <Input
+                            size="lg"
+                            label="Email *"
+                            name="email"
+                            type="email"
+                            placeholder="Email"
+                            className="input input-bordered w-full col-span-2 md:col-span-1"
+                            isInvalid={Boolean(
+                              (touched.email || submitCount > 0) && errors.email
+                            )}
+                            errorMessage={
+                              ((touched.email || submitCount > 0) &&
+                                errors.email) ||
+                              ""
+                            }
+                            value={values.email}
+                            onChange={handleChange}
+                          />
+
+                          <Input
+                            size="lg"
+                            label="Téléphone *"
+                            name="phone"
+                            placeholder="Téléphone"
+                            className="input input-bordered w-full col-span-2 md:col-span-1"
+                            isInvalid={Boolean(
+                              (touched.phone || submitCount > 0) && errors.phone
+                            )}
+                            errorMessage={
+                              ((touched.phone || submitCount > 0) &&
+                                errors.phone) ||
+                              ""
+                            }
+                            value={values.phone}
+                            onChange={handleChange}
+                          />
+
+                          <Input
+                            size="lg"
+                            label="Adresse *"
+                            name="address"
+                            placeholder="Adresse"
+                            className="input input-bordered w-full col-span-2 md:col-span-1"
+                            isInvalid={Boolean(
+                              (touched.address || submitCount > 0) &&
+                                errors.address
+                            )}
+                            errorMessage={
+                              ((touched.address || submitCount > 0) &&
+                                errors.address) ||
+                              ""
+                            }
+                            value={values.address}
+                            onChange={handleChange}
+                          />
+
+                          <Input
+                            size="lg"
+                            label="Ville  *"
+                            name="city"
+                            placeholder="Ville"
+                            className="input input-bordered w-full col-span-2 md:col-span-1"
+                            isInvalid={Boolean(
+                              (touched.city || submitCount > 0) && errors.city
+                            )}
+                            errorMessage={
+                              ((touched.city || submitCount > 0) &&
+                                errors.city) ||
+                              ""
+                            }
+                            value={values.city}
+                            onChange={handleChange}
+                          />
+
+                          <Input
+                            size="lg"
+                            label="Code postal *"
+                            name="zip_code"
+                            placeholder="Code postal"
+                            className="input input-bordered w-full col-span-2 md:col-span-1"
+                            isInvalid={Boolean(
+                              (touched.zip_code || submitCount > 0) &&
+                                errors.zip_code
+                            )}
+                            errorMessage={
+                              ((touched.zip_code || submitCount > 0) &&
+                                errors.zip_code) ||
+                              ""
+                            }
+                            value={values.zip_code}
+                            onChange={handleChange}
+                          />
+
+                          <Textarea
+                            size="lg"
+                            label="Commentaire"
+                            name="note"
+                            placeholder="Commentaire"
+                            className="input input-bordered w-full col-span-2 md:col-span-2"
+                            value={values.note}
+                            onChange={handleChange}
+                          />
+                        </div>
+                        <div className="flex justify-end">
+                          <Button
+                            type="submit"
+                            color="success"
+                            className="w-full rounded-md"
+                            isLoading={isLoading}
+                            size="lg"
+                            isDisabled={isSubmitting || cart.length === 0}
+                          >
+                            <CreditCard size={16} />
+                            Payer
+                          </Button>
+                        </div>
+                      </Form>
+                    )}
+                  </Formik>
+                </CardBody>
+              </Card>
+            </>
+          )}
+
+          {user && (
+            <div className="flex justify-end mt-8">
+              <Button
+                type="submit"
+                color="success"
+                className="w-full rounded-md"
+                isLoading={isLoading}
+                size="lg"
+                isDisabled={cart.length === 0}
+                onPress={() => createPayment(user)}
               >
-                {({
-                  isValid,
-                  dirty,
-                  values,
-                  handleChange,
-                  isSubmitting,
-                  errors,
-                  touched,
-                  submitCount,
-                }) => (
-                  <Form className=" space-y-4">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <Input
-                        size="lg"
-                        label="Société"
-                        name="society"
-                        placeholder="Nom de la société"
-                        className="input input-bordered w-full col-span-2 md:col-span-1"
-                        value={values.society}
-                        onChange={handleChange}
-                      />
-
-                      <Input
-                        size="lg"
-                        label="Nom *"
-                        name="last_name"
-                        placeholder="Nom"
-                        className="input input-bordered w-full col-span-2 md:col-span-1"
-                        isInvalid={Boolean(
-                          (touched.last_name || submitCount > 0) &&
-                            errors.last_name
-                        )}
-                        errorMessage={
-                          ((touched.last_name || submitCount > 0) &&
-                            errors.last_name) ||
-                          ""
-                        }
-                        value={values.last_name}
-                        onChange={handleChange}
-                      />
-
-                      <Input
-                        size="lg"
-                        label="Prénom *"
-                        name="first_name"
-                        placeholder="Prénom"
-                        className="input input-bordered w-full col-span-2 md:col-span-1"
-                        isInvalid={Boolean(
-                          (touched.first_name || submitCount > 0) &&
-                            errors.first_name
-                        )}
-                        errorMessage={
-                          ((touched.first_name || submitCount > 0) &&
-                            errors.first_name) ||
-                          ""
-                        }
-                        value={values.first_name}
-                        onChange={handleChange}
-                      />
-
-                      <Input
-                        size="lg"
-                        label="Email *"
-                        name="email"
-                        type="email"
-                        placeholder="Email"
-                        className="input input-bordered w-full col-span-2 md:col-span-1"
-                        isInvalid={Boolean(
-                          (touched.email || submitCount > 0) && errors.email
-                        )}
-                        errorMessage={
-                          ((touched.email || submitCount > 0) &&
-                            errors.email) ||
-                          ""
-                        }
-                        value={values.email}
-                        onChange={handleChange}
-                      />
-
-                      <Input
-                        size="lg"
-                        label="Téléphone *"
-                        name="phone"
-                        placeholder="Téléphone"
-                        className="input input-bordered w-full col-span-2 md:col-span-1"
-                        isInvalid={Boolean(
-                          (touched.phone || submitCount > 0) && errors.phone
-                        )}
-                        errorMessage={
-                          ((touched.phone || submitCount > 0) &&
-                            errors.phone) ||
-                          ""
-                        }
-                        value={values.phone}
-                        onChange={handleChange}
-                      />
-
-                      <Input
-                        size="lg"
-                        label="Adresse *"
-                        name="address"
-                        placeholder="Adresse"
-                        className="input input-bordered w-full col-span-2 md:col-span-1"
-                        isInvalid={Boolean(
-                          (touched.address || submitCount > 0) && errors.address
-                        )}
-                        errorMessage={
-                          ((touched.address || submitCount > 0) &&
-                            errors.address) ||
-                          ""
-                        }
-                        value={values.address}
-                        onChange={handleChange}
-                      />
-
-                      <Input
-                        size="lg"
-                        label="Ville  *"
-                        name="city"
-                        placeholder="Ville"
-                        className="input input-bordered w-full col-span-2 md:col-span-1"
-                        isInvalid={Boolean(
-                          (touched.city || submitCount > 0) && errors.city
-                        )}
-                        errorMessage={
-                          ((touched.city || submitCount > 0) && errors.city) ||
-                          ""
-                        }
-                        value={values.city}
-                        onChange={handleChange}
-                      />
-
-                      <Input
-                        size="lg"
-                        label="Code postal *"
-                        name="zip_code"
-                        placeholder="Code postal"
-                        className="input input-bordered w-full col-span-2 md:col-span-1"
-                        isInvalid={Boolean(
-                          (touched.zip_code || submitCount > 0) &&
-                            errors.zip_code
-                        )}
-                        errorMessage={
-                          ((touched.zip_code || submitCount > 0) &&
-                            errors.zip_code) ||
-                          ""
-                        }
-                        value={values.zip_code}
-                        onChange={handleChange}
-                      />
-
-                      <Textarea
-                        size="lg"
-                        label="Commentaire"
-                        name="note"
-                        placeholder="Commentaire"
-                        className="input input-bordered w-full col-span-2 md:col-span-2"
-                        value={values.note}
-                        onChange={handleChange}
-                      />
-                    </div>
-                    <div className="flex justify-end">
-                      <Button
-                        type="submit"
-                        color="success"
-                        className="w-full rounded-md"
-                        isLoading={isLoading}
-                        size="lg"
-                        isDisabled={isSubmitting || cart.length === 0}
-                      >
-                        <CreditCard size={16} />
-                        Payer
-                      </Button>
-                    </div>
-                  </Form>
-                )}
-              </Formik>
-            </CardBody>
-          </Card>
+                <CreditCard size={16} />
+                Payer
+              </Button>
+            </div>
+          )}
         </>
       )}
     </div>
