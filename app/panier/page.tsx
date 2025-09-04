@@ -20,7 +20,7 @@ import { LoginForm } from "../components/LoginForm";
 import { useAuth } from "../context/AuthContext";
 
 export default function PanierPage() {
-  const { user } = useAuth();
+  const { user, isDemo } = useAuth();
   const [cart, setCart] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
@@ -421,6 +421,7 @@ export default function PanierPage() {
                           <Button
                             type="submit"
                             color="success"
+                            disabled={isDemo}
                             className="w-full rounded-md"
                             isLoading={isLoading}
                             size="lg"
@@ -429,6 +430,11 @@ export default function PanierPage() {
                             <CreditCard size={16} />
                             Payer
                           </Button>
+                          {isDemo && (
+                            <span className="text-sm text-gray-500">
+                              " (Demo Mode)"
+                            </span>
+                          )}
                         </div>
                       </Form>
                     )}
@@ -443,6 +449,7 @@ export default function PanierPage() {
               <Button
                 type="submit"
                 color="success"
+                disabled={isDemo}
                 className="w-full rounded-md"
                 isLoading={isLoading}
                 size="lg"
@@ -452,6 +459,9 @@ export default function PanierPage() {
                 <CreditCard size={16} />
                 Payer
               </Button>
+              {isDemo && (
+                <span className="text-sm text-gray-500">" (Demo Mode)"</span>
+              )}
             </div>
           )}
         </>

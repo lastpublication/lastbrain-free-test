@@ -1,5 +1,5 @@
 "use client";
-import { Button, Card, CardBody, Input } from "@heroui/react";
+import { addToast, Button, Card, CardBody, Input } from "@heroui/react";
 import axios from "axios";
 import { Form, Formik } from "formik";
 import { Triangle, TriangleAlert } from "lucide-react";
@@ -37,6 +37,14 @@ export const LoginForm = () => {
         setUser(response.data.profile);
         // router.push("/private");
         router.refresh();
+      } else {
+        addToast({
+          title: "Erreur",
+          description: "Email ou mot de passe incorrect",
+          color: "danger",
+          timeout: 3000,
+          shouldShowTimeoutProgress: true,
+        });
       }
     } catch (error: any) {
       setFieldError(
