@@ -13,6 +13,8 @@ import { TriangleAlertIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { calculPriceTTC } from "../utils/calculTva";
+import { useGlobal } from "../context/GlobalContext";
+import { LBButton, LBCard } from "../components/ui/Primitives";
 
 export default function Page() {
   const [data, setData] = useState<any[]>([]);
@@ -97,8 +99,7 @@ export default function Page() {
         {data.length > 0 && (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {data.map((item: any, index: number) => (
-              <Card
-                radius="sm"
+              <LBCard
                 key={`${item.id} - ${index}`}
                 className="flex flex-col justify-between "
               >
@@ -137,20 +138,18 @@ export default function Page() {
                       </div>
                     )}
 
-                    <Button
+                    <LBButton
                       as={Link}
                       isLoading={isLoading}
-                      variant="solid"
-                      color="success"
-                      radius="none"
+                      color="default"
                       className="w-full mt-4"
                       href={`/produit/${item.code_product}`}
                     >
                       Voir le produit
-                    </Button>
+                    </LBButton>
                   </div>
                 </CardBody>
-              </Card>
+              </LBCard>
             ))}
           </div>
         )}
@@ -165,11 +164,9 @@ export default function Page() {
           </div>
         )}
         {!hasMore && data.length > 0 && (
-          <div className="p-4 border border-black/40 dark:border-white/40  rounded text-center mt-8">
-            <h3 className="font-bold text-black/30 dark:text-white/40">
-              Tous les produits chargés.
-            </h3>
-          </div>
+          <LBCard className="mt-8 p-4 text-center ">
+            <span className="!font-ligth">Tous les produits chargés.</span>
+          </LBCard>
         )}
       </div>
     </div>

@@ -18,6 +18,7 @@ import { useEffect, useState } from "react";
 import { calculPriceTTC } from "../../utils/calculTva";
 import { useAuth } from "../../context/AuthContext";
 import { AnimatePresence, motion } from "framer-motion";
+import { LBButton, LBCard } from "../../components/ui/Primitives";
 
 export default function Page() {
   const params = useParams();
@@ -98,9 +99,9 @@ export default function Page() {
   }
   return (
     <div>
-      <div className="max-w-6xl mx-auto p-6 flex flex-col lg:flex-row gap-8">
+      <div className="max-w-6xl mx-auto p-6 grid md:grid-cols-2 gap-8">
         {/* Galerie */}
-        <div className="flex-1">
+        <div className="col-span-1">
           <div
             className={
               "aspect-square rounded-lg overflow-hidden flex items-center justify-center cursor-zoom-in " +
@@ -132,7 +133,7 @@ export default function Page() {
               )}
             </AnimatePresence>
           </div>
-          <div className="flex gap-2 overflow-x-auto pb-2 mt-4">
+          <div className="flex gap-2 overflow-x-auto p-4  mt-4">
             {Array.isArray(product.gallery) &&
               product.gallery.length > 0 &&
               product.gallery.map((img: string, i: number) => (
@@ -150,7 +151,7 @@ export default function Page() {
           </div>
         </div>
         {/* Infos produit */}
-        <Card className="flex-1">
+        <LBCard className="">
           <CardBody className="space-y-4">
             <CardHeader className="flex flex-col items-start gap-1">
               <h1 className="text-3xl font-bold capitalize">{product.name}</h1>
@@ -161,14 +162,12 @@ export default function Page() {
               )}
             </CardHeader>
             {product.description && (
-              <ScrollShadow className="max-h-[300px]" hideScrollBar>
-                <div
-                  className="prose prose-sm max-w-none text-black/80 dark:text-white/60"
-                  dangerouslySetInnerHTML={{
-                    __html: product.description.replace(/\n/g, "<br/>"),
-                  }}
-                />
-              </ScrollShadow>
+              <div
+                className="prose prose-sm max-w-none text-black/80 dark:text-white/60"
+                dangerouslySetInnerHTML={{
+                  __html: product.description.replace(/\n/g, "<br/>"),
+                }}
+              />
             )}
             <div className="flex items-center justify-between gap-4 mt-2">
               <span className="text-xs text-gray-500">
@@ -193,31 +192,29 @@ export default function Page() {
               </div>
             )}
             {product.stock > 0 && (
-              <Button
+              <LBButton
                 color="primary"
                 isDisabled={isDemo}
-                radius="none"
                 disabled={product.stock < 1}
                 onPress={() => addToCart(product)}
               >
                 Ajouter au panier
-              </Button>
+              </LBButton>
             )}
             {product.stock === 0 && (
               <Tooltip content=" Pas de stock ">
-                <Button
-                  color="primary"
+                <LBButton
+                  color="default"
                   isDisabled={isDemo}
                   className="!opacity-40 !hover:opacity-40"
-                  radius="none"
                   disabled={product.stock < 1}
                 >
                   Ajouter au panier
-                </Button>
+                </LBButton>
               </Tooltip>
             )}
           </CardBody>
-        </Card>
+        </LBCard>
       </div>
 
       {/* Modal d'image */}

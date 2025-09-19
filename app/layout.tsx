@@ -7,6 +7,7 @@ import { AuthProvider } from "./context/AuthContext";
 import { TriangleAlert } from "lucide-react";
 import AffProvider from "./context/AffContext";
 import { readAffiliateCookie } from "./utils/aff";
+import { GlobalProvider } from "./context/GlobalContext";
 
 export const metadata = {
   title: "Next.js",
@@ -24,26 +25,28 @@ export default function RootLayout({
   return (
     <html suppressHydrationWarning lang="en">
       <body className="min-h-screen bg-background">
-        <AffProvider initial={aff}>
-          <InfoSocietyProvider>
-            <Providers
-              themeProps={{ attribute: "class", defaultTheme: "light" }}
-            >
-              <AuthProvider>
-                <Suspense fallback={<div>Loading...</div>}>
-                  {isDemo && (
-                    <div className="w-screen relative top-0 h-10 bg-danger z-50 flex items-center justify-center text-white text-sm uppercase gap-5">
-                      <TriangleAlert size={24} />
-                      {"Demo Mode"}
-                    </div>
-                  )}
-                  <NavbarComponent />
-                  {children}
-                </Suspense>
-              </AuthProvider>
-            </Providers>
-          </InfoSocietyProvider>
-        </AffProvider>
+        <GlobalProvider>
+          <AffProvider initial={aff}>
+            <InfoSocietyProvider>
+              <Providers
+                themeProps={{ attribute: "data-theme", defaultTheme: "light" }}
+              >
+                <AuthProvider>
+                  <Suspense fallback={<div>Loading...</div>}>
+                    {isDemo && (
+                      <div className="w-screen relative top-0 h-10 bg-danger z-50 flex items-center justify-center text-white text-sm uppercase gap-5">
+                        <TriangleAlert size={24} />
+                        {"Demo Mode"}
+                      </div>
+                    )}
+                    <NavbarComponent />
+                    {children}
+                  </Suspense>
+                </AuthProvider>
+              </Providers>
+            </InfoSocietyProvider>
+          </AffProvider>
+        </GlobalProvider>
       </body>
     </html>
   );

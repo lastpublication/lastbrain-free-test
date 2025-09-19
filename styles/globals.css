@@ -1,11 +1,179 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
+/* 
 html {
-  transition: background 0.2s;
+  background: var(--lb-color-background, #ffffff);
+  color: var(--lb-color-foreground, #111111);
+  transition: background-color 0.25s ease, color 0.25s ease;
 }
 html.dark {
   background: #18181b;
   color-scheme: dark;
+} */
+
+/* ------------------------------
+   LastBrain Theme – defaults
+   These are fallback values; they will be overridden at runtime
+   by the inline <style id="lb-theme-style"> injected from GlobalProvider
+--------------------------------- */
+:root {
+  /* Typography */
+  --lb-font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica,
+    Arial, sans-serif;
+  --lb-h1: 2rem;
+  --lb-h2: 1.5rem;
+  --lb-h3: 1.25rem;
+
+  /* Radii */
+  --lb-radius: 0.5rem; /* ~ lg */
+
+  /* Colors (light fallbacks) */
+  --lb-color-background: #ffffff;
+  --lb-color-foreground: #111111;
+  --lb-color-primary: #7c3aed; /* default */
+  --lb-color-secondary: #0ea5e9; /* secondary */
+  --lb-color-success: #22c55e;
+  --lb-color-warning: #f59e0b;
+  --lb-color-danger: #ef4444;
+  --lb-color-content1: #f7f7f8;
+  --lb-color-content2: #efeff1;
+  --lb-color-content3: #e7e7ea;
+}
+
+/* Bridge LastBrain vars -> Tailwind/HeroUI runtime vars */
+:root,
+html[data-theme="light"] {
+  --background: var(--lb-color-background);
+  --foreground: var(--lb-color-foreground);
+  --primary: var(--lb-color-primary);
+  --secondary: var(--lb-color-secondary);
+  --accent: var(
+    --lb-color-secondary
+  ); /* you can change to another token if you add one */
+  --muted: var(--lb-color-content2);
+  --border: var(--lb-color-content2);
+  --input: var(--lb-color-content2);
+  --ring: var(--lb-color-primary);
+  --radius: var(--lb-radius);
+  transition: background-color 0.8s ease, color 0.8s ease,
+    border-color 0.8s ease;
+}
+html[data-theme="dark"] {
+  --background: var(--lb-color-background);
+  --foreground: var(--lb-color-foreground);
+  --primary: var(--lb-color-primary);
+  --secondary: var(--lb-color-secondary);
+  --accent: var(
+    --lb-color-secondary
+  ); /* you can change to another token if you add one */
+  --muted: var(--lb-color-content2);
+  --border: var(--lb-color-content2);
+  --input: var(--lb-color-content2);
+  --ring: var(--lb-color-primary);
+  --radius: var(--lb-radius);
+  transition: background-color 0.8s ease, color 0.8s ease,
+    border-color 0.8s ease;
+}
+
+/* Dark-mode fallbacks when using Tailwind's `dark` class */
+html {
+  color: var(--lb-color-foreground, #111111);
+  transition: background-color 0.25s ease, color 0.25s ease;
+}
+
+/* Optional helpers using the variables */
+body {
+  font-family: var(--lb-font-family);
+}
+
+h1,
+.h1 {
+  font-size: var(--lb-h1);
+}
+h2,
+.h2 {
+  font-size: var(--lb-h2);
+}
+h3,
+.h3 {
+  font-size: var(--lb-h3);
+}
+
+.rounded-theme {
+  border-radius: var(--lb-radius);
+}
+
+/* Card variants */
+.card-solid {
+  background: var(--lb-color-content1);
+  color: var(--lb-color-foreground);
+  border-radius: var(--lb-radius);
+  padding: 1rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+.card-bordered {
+  background: var(--lb-color-background);
+  color: var(--lb-color-foreground);
+  border-radius: var(--lb-radius);
+  border: 1px solid var(--lb-color-content2);
+  padding: 1rem;
+}
+.card-flat {
+  background: transparent;
+  color: var(--lb-color-foreground);
+  border-radius: var(--lb-radius);
+  padding: 1rem;
+}
+
+/* Button variants */
+.btn-solid {
+  background: var(--lb-color-primary);
+  color: var(--lb-color-foreground);
+  border-radius: var(--lb-radius);
+  padding: 0.5rem 1rem;
+}
+.btn-bordered {
+  background: transparent;
+  color: var(--lb-color-primary);
+  border: 1px solid var(--lb-color-primary);
+  border-radius: var(--lb-radius);
+  padding: 0.5rem 1rem;
+}
+.btn-flat {
+  background: transparent;
+  color: var(--lb-color-primary);
+  border-radius: var(--lb-radius);
+  padding: 0.5rem 1rem;
+}
+.btn-ghost {
+  background: transparent;
+  color: var(--lb-color-foreground);
+  border-radius: var(--lb-radius);
+  opacity: 0.8;
+  padding: 0.5rem 1rem;
+}
+
+/* Utility surfaces derived from content colors */
+.bg-content-1 {
+  background-color: var(--lb-color-content1);
+}
+.bg-content-2 {
+  background-color: var(--lb-color-content2);
+}
+.bg-content-3 {
+  background-color: var(--lb-color-content3);
+}
+.text-foreground {
+  color: var(--lb-color-foreground);
+}
+.text-primary {
+  color: var(--lb-color-primary);
+}
+
+/* Prefer reduced motion respect */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    transition: none;
+  }
 }

@@ -8,6 +8,8 @@ import { useEffect, useState } from "react";
 import * as Yup from "yup";
 import { useAuth } from "../context/AuthContext";
 import { useRouter } from "next/navigation";
+import { useGlobal } from "../context/GlobalContext";
+import { LBButton, LBCard, LBInput } from "./ui/Primitives";
 export const LoginForm = () => {
   const { user, setUser } = useAuth();
   const validationSchema = Yup.object({
@@ -61,7 +63,7 @@ export const LoginForm = () => {
     }
   }, [user]);
   return (
-    <Card className="w-full mt-5">
+    <LBCard>
       <CardBody className="flex flex-col items-center justify-center p-6">
         <Formik
           initialValues={{ email: "", password: "" }}
@@ -78,7 +80,7 @@ export const LoginForm = () => {
             setFieldValue,
           }) => (
             <Form className=" w-full">
-              <Input
+              <LBInput
                 size="lg"
                 name="email"
                 type="text"
@@ -94,7 +96,7 @@ export const LoginForm = () => {
                 value={values.email}
                 onChange={handleChange}
               />
-              <Input
+              <LBInput
                 size="lg"
                 type="password"
                 name="password"
@@ -112,8 +114,7 @@ export const LoginForm = () => {
                 onChange={handleChange}
               />
 
-              <Button
-                variant="solid"
+              <LBButton
                 type="submit"
                 color="success"
                 className="w-full"
@@ -121,11 +122,11 @@ export const LoginForm = () => {
                 isLoading={isLoading}
               >
                 Se connecter
-              </Button>
+              </LBButton>
             </Form>
           )}
         </Formik>
       </CardBody>
-    </Card>
+    </LBCard>
   );
 };

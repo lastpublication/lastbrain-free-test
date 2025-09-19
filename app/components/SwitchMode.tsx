@@ -25,8 +25,20 @@ export const ThemeSwitch: FC<ThemeSwitchProps> = ({
   const isSSR = useIsSSR();
 
   const onChange = () => {
-    theme === "light" ? setTheme("dark") : setTheme("light");
+    const newTheme = theme === "light" ? "dark" : "light";
+    setTheme(newTheme);
+    if (typeof document !== "undefined") {
+      document.documentElement.setAttribute("data-theme", newTheme);
+    }
   };
+
+  // Determine current data-theme attribute value for visual mode
+  const dataTheme =
+    typeof document !== "undefined"
+      ? document.documentElement.getAttribute("data-theme")
+      : null;
+
+  const isLightMode = dataTheme === "light" || (isSSR && theme === "light");
 
   const {
     Component,
@@ -124,7 +136,7 @@ export const ThemeSwitch: FC<ThemeSwitchProps> = ({
           ),
         })}
       >
-        {!isSelected || isSSR ? (
+        {!isLightMode ? (
           <SunFilledIcon size={24} />
         ) : (
           <MoonFilledIcon size={24} />
