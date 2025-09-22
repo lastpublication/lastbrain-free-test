@@ -1,10 +1,13 @@
 "use client";
 import { createContext, useEffect, useMemo, useState } from "react";
+import { useGlobal } from "./GlobalContext";
+import { Loading } from "../components/Loading";
 
 export const AffContext = createContext<any>(null);
 
 export default function AffProvider({ initial, children }: any) {
   const [aff, setAff] = useState(initial);
+  const { global } = useGlobal();
   useEffect(() => {
     if (aff) {
       try {
@@ -17,5 +20,8 @@ export default function AffProvider({ initial, children }: any) {
     }
   }, [aff]);
   const value = useMemo(() => aff, [aff]);
+
+  if (!global) return <Loading />;
+
   return <AffContext.Provider value={value}>{children}</AffContext.Provider>;
 }

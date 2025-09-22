@@ -24,7 +24,7 @@ export default function RootLayout({
   const isDemo = process.env.NEXT_PUBLIC_DEMO === "true";
   return (
     <html suppressHydrationWarning lang="en">
-      <body className="min-h-screen bg-background">
+      <body className=" bg-background min-h-screen">
         <GlobalProvider>
           <AffProvider initial={aff}>
             <InfoSocietyProvider>

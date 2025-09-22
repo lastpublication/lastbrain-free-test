@@ -9,16 +9,19 @@ import {
   Modal,
   ModalBody,
   ModalContent,
+  ModalHeader,
   ScrollShadow,
   Spinner,
   Tooltip,
+  useDisclosure,
 } from "@heroui/react";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
-import { calculPriceTTC } from "../../utils/calculTva";
-import { useAuth } from "../../context/AuthContext";
+import { calculPriceTTC } from "../../../utils/calculTva";
+import { useAuth } from "../../../context/AuthContext";
 import { AnimatePresence, motion } from "framer-motion";
-import { LBButton, LBCard } from "../../components/ui/Primitives";
+import { LBButton, LBCard } from "../../../components/ui/Primitives";
+import { ShoppingCart } from "lucide-react";
 
 export default function Page() {
   const params = useParams();
@@ -27,8 +30,9 @@ export default function Page() {
   const [product, setProduct] = useState<any>(null);
   const [mainImage, setMainImage] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [isViewerOpen, setIsViewerOpen] = useState(false);
+  const { isOpen, onOpenChange, onClose } = useDisclosure();
   useEffect(() => {
+    console.log("Fetching product", code_product);
     if (code_product) {
       fetch(`/api/product?code_product=${code_product}`)
         .then((res) => res.json())
@@ -107,7 +111,7 @@ export default function Page() {
               "aspect-square rounded-lg overflow-hidden flex items-center justify-center cursor-zoom-in " +
               (mainImage ? "" : "bg-content1 border")
             }
-            onClick={() => mainImage && setIsViewerOpen(true)}
+            onClick={() => mainImage && onOpenChange()}
           >
             <AnimatePresence mode="wait">
               {mainImage ? (
@@ -151,19 +155,19 @@ export default function Page() {
           </div>
         </div>
         {/* Infos produit */}
-        <LBCard className="">
-          <CardBody className="space-y-4">
-            <CardHeader className="flex flex-col items-start gap-1">
-              <h1 className="text-3xl font-bold capitalize">{product.name}</h1>
-              {product.code_product && (
-                <p className="text-xs text-gray-400">
-                  Code produit : {product.code_product}
-                </p>
-              )}
-            </CardHeader>
+        <LBCard className="hover:scale-105 hover:shadow-lg transition-all">
+          <CardHeader className="flex flex-col items-start gap-1">
+            <h1 className="text-3xl font-bold capitalize">{product.name}</h1>
+            {product.code_product && (
+              <p className="text-xs text-gray-400">
+                Code produit : {product.code_product}
+              </p>
+            )}
+          </CardHeader>
+          <CardBody className="space-y-4 p-4 h-full flex flex-col justify-between">
             {product.description && (
               <div
-                className="prose prose-sm max-w-none text-black/80 dark:text-white/60"
+                className="flex-1 prose prose-sm max-w-none text-black/80 dark:text-white/60"
                 dangerouslySetInnerHTML={{
                   __html: product.description.replace(/\n/g, "<br/>"),
                 }}
@@ -175,11 +179,26 @@ export default function Page() {
                   ? "En stock (" + product.stock + " " + product.unit + ")"
                   : "Rupture de stock"}
               </span>
-              <span className="text-2xl font-semibold text-primary">
-                {calculPriceTTC(
-                  Number(product.sale_price),
-                  Number(product.tax_rate)
-                ).toFixed(2)}
+              <span className="text-2xl font-bold text-primary">
+                {
+                  calculPriceTTC(
+                    Number(product.sale_price),
+                    Number(product.tax_rate)
+                  )
+                    .toFixed(2)
+                    .split(".")[0]
+                }
+                .
+                <span className="text-xl font-regular">
+                  {
+                    calculPriceTTC(
+                      Number(product.sale_price),
+                      Number(product.tax_rate)
+                    )
+                      .toFixed(2)
+                      .split(".")[1]
+                  }
+                </span>{" "}
                 €
               </span>
             </div>
@@ -193,10 +212,12 @@ export default function Page() {
             )}
             {product.stock > 0 && (
               <LBButton
-                color="primary"
                 isDisabled={isDemo}
+                color="success"
                 disabled={product.stock < 1}
                 onPress={() => addToCart(product)}
+                startContent={<ShoppingCart size={16} />}
+                size="lg"
               >
                 Ajouter au panier
               </LBButton>
@@ -204,10 +225,12 @@ export default function Page() {
             {product.stock === 0 && (
               <Tooltip content=" Pas de stock ">
                 <LBButton
-                  color="default"
                   isDisabled={isDemo}
                   className="!opacity-40 !hover:opacity-40"
                   disabled={product.stock < 1}
+                  size="lg"
+                  color="success"
+                  startContent={<ShoppingCart size={16} />}
                 >
                   Ajouter au panier
                 </LBButton>
@@ -218,19 +241,24 @@ export default function Page() {
       </div>
 
       {/* Modal d'image */}
-      <Modal isOpen={isViewerOpen} onOpenChange={setIsViewerOpen} size="xl">
+      <Modal
+        backdrop="blur"
+        isOpen={isOpen}
+        onOpenChange={onOpenChange}
+        size="3xl"
+      >
         <ModalContent>
-          {() => (
-            <ModalBody className="p-0">
-              {mainImage && (
+          <ModalBody className="p-8">
+            {mainImage && (
+              <div className="z-1 mt-8">
                 <Image
                   src={mainImage}
                   alt={product.name}
-                  className="w-full h-full object-contain"
+                  className=" w-full h-full object-contain no-pointer-events"
                 />
-              )}
-            </ModalBody>
-          )}
+              </div>
+            )}
+          </ModalBody>
         </ModalContent>
       </Modal>
     </div>

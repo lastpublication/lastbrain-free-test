@@ -161,6 +161,7 @@ async function guardPrivate(req: NextRequest): Promise<NextResponse | null> {
 
   // If no user token, send to login
   if (!userToken) {
+    console.log("redirection");
     return NextResponse.redirect(new URL("/login", req.url));
   }
 
@@ -186,7 +187,7 @@ async function guardPrivate(req: NextRequest): Promise<NextResponse | null> {
       body: JSON.stringify({ token: userToken }),
       cache: "no-store",
     });
-    console.log(resp);
+
     // OK -> let the request pass
     if (resp.ok) return null;
 

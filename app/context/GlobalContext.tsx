@@ -103,7 +103,10 @@ function applyThemeCss(
     document.head.appendChild(styleEl);
   }
   styleEl.textContent = css;
-  document.documentElement.setAttribute("data-theme", modeDefault);
+  document.documentElement.setAttribute(
+    "data-theme",
+    localStorage.getItem("theme") || modeDefault
+  );
 }
 
 export function GlobalProvider({ children }: { children: React.ReactNode }) {

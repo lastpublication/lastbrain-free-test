@@ -14,6 +14,7 @@ import HCard, { Card, type CardProps } from "@heroui/card";
 
 import HSelect, { Select, type SelectProps } from "@heroui/select";
 import HChip, { Chip as BaseChip, type ChipProps } from "@heroui/chip";
+import { Tab, Tabs, type TabsProps } from "@heroui/tabs";
 import { useGlobal } from "../../context/GlobalContext";
 
 // 1) Input
@@ -101,6 +102,24 @@ export const LBChip = React.forwardRef<HTMLDivElement, ChipProps>(
       >
         {children}
       </BaseChip>
+    );
+  }
+);
+LBChip.displayName = "LBChip";
+
+// 6) Chip
+export const LBTabs = React.forwardRef<HTMLDivElement, TabsProps>(
+  ({ radius, variant, children, ...rest }, ref) => {
+    const { radius: r, variantComponent } = useGlobal();
+
+    return (
+      <Tabs
+        radius={(radius ?? (r as any)) as any}
+        variant={(variant ?? (variantComponent as any)) as any}
+        {...rest}
+      >
+        {children}
+      </Tabs>
     );
   }
 );

@@ -18,6 +18,7 @@ import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import { LoginForm } from "../components/LoginForm";
 import { useAuth } from "../context/AuthContext";
+import { LBButton, LBInput, LBTextarea } from "../components/ui/Primitives";
 
 export default function PanierPage() {
   const { user, isDemo } = useAuth();
@@ -204,21 +205,20 @@ export default function PanierPage() {
                   </div>
                   <div className="text-md flex items-center gap-3 space-x-5 font-bold text-foreground text-end">
                     {item.price_ttc.toFixed(2)} €
-                    <Button
+                    <LBButton
                       isIconOnly
-                      variant="light"
                       color="danger"
                       onPress={() => removeFromCart(index)}
                     >
                       <Trash2 size={16} />
-                    </Button>
+                    </LBButton>
                   </div>
                 </div>
               </li>
             ))}
           </ul>
 
-          <div className="w-full  border-t dark:border-t-white/20 pt-4">
+          <div className="w-full  border-t dark:border-t-white/20 pt-4 mb-24">
             <div className="flex flex-col items-end">
               {" "}
               <div className="w-1/2 flex justify-between items-center gap-4">
@@ -266,7 +266,7 @@ export default function PanierPage() {
                     }) => (
                       <Form className=" space-y-4">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                          <Input
+                          <LBInput
                             size="lg"
                             label="Société"
                             name="society"
@@ -276,7 +276,7 @@ export default function PanierPage() {
                             onChange={handleChange}
                           />
 
-                          <Input
+                          <LBInput
                             size="lg"
                             label="Nom *"
                             name="last_name"
@@ -295,7 +295,7 @@ export default function PanierPage() {
                             onChange={handleChange}
                           />
 
-                          <Input
+                          <LBInput
                             size="lg"
                             label="Prénom *"
                             name="first_name"
@@ -314,7 +314,7 @@ export default function PanierPage() {
                             onChange={handleChange}
                           />
 
-                          <Input
+                          <LBInput
                             size="lg"
                             label="Email *"
                             name="email"
@@ -333,7 +333,7 @@ export default function PanierPage() {
                             onChange={handleChange}
                           />
 
-                          <Input
+                          <LBInput
                             size="lg"
                             label="Téléphone *"
                             name="phone"
@@ -351,7 +351,7 @@ export default function PanierPage() {
                             onChange={handleChange}
                           />
 
-                          <Input
+                          <LBInput
                             size="lg"
                             label="Adresse *"
                             name="address"
@@ -370,7 +370,7 @@ export default function PanierPage() {
                             onChange={handleChange}
                           />
 
-                          <Input
+                          <LBInput
                             size="lg"
                             label="Ville  *"
                             name="city"
@@ -388,7 +388,7 @@ export default function PanierPage() {
                             onChange={handleChange}
                           />
 
-                          <Input
+                          <LBInput
                             size="lg"
                             label="Code postal *"
                             name="zip_code"
@@ -407,7 +407,7 @@ export default function PanierPage() {
                             onChange={handleChange}
                           />
 
-                          <Textarea
+                          <LBTextarea
                             size="lg"
                             label="Commentaire"
                             name="note"
@@ -418,18 +418,18 @@ export default function PanierPage() {
                           />
                         </div>
                         <div className="flex justify-end">
-                          <Button
+                          <LBButton
                             type="submit"
                             color="success"
                             disabled={isDemo}
-                            className="w-full rounded-md"
+                            className="w-full"
                             isLoading={isLoading}
                             size="lg"
                             isDisabled={isSubmitting || cart.length === 0}
                           >
                             <CreditCard size={16} />
                             Payer
-                          </Button>
+                          </LBButton>
                           {isDemo && (
                             <span className="text-sm text-gray-500">
                               " (Demo Mode)"

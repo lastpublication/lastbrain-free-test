@@ -7,6 +7,8 @@ import { useEffect, useState } from "react";
 import CustomerForm from "./components/CustomerForm";
 import { ProjectTab } from "./components/ProjectTab";
 import { useAuth } from "../context/AuthContext";
+import { PaiemnentTab } from "./components/PaiementTab";
+import { LBTabs } from "../components/ui/Primitives";
 
 type CustomerFormType = {
   siret: string;
@@ -30,6 +32,7 @@ export default function Page() {
   const { setUser } = useAuth();
 
   const [projects, setProjects] = useState<any | null>(null);
+  const [paiements, setPaiements] = useState<any | null>(null);
   const [invoices, setInvoices] = useState<[]>([]);
   const [avoirs, setAvoirs] = useState<[]>([]);
   const [customer, setCustomer] = useState<CustomerFormType | null>(null);
@@ -45,7 +48,7 @@ export default function Page() {
         setCustomer(response.data.profile || []);
         setInvoices(response.data.invoices || []);
         setAvoirs(response.data.avoirs || []);
-
+        setPaiements(response.data.paiements || []);
         setIsLoading(false);
       })
       .catch((error) => {
@@ -53,6 +56,7 @@ export default function Page() {
         setAvoirs([]);
         setCustomer(null);
         setInvoices([]);
+        setPaiements(null);
         setError(
           error.response.data.message || "Erreur lors de la récupération"
         );
@@ -84,7 +88,12 @@ export default function Page() {
   }
   return (
     <div className="mt-8 w-full ">
-      <Tabs aria-label="Options" className="flex justify-center" size="lg">
+      <LBTabs
+        aria-label="Options"
+        color="secondary"
+        className="flex justify-center"
+        size="lg"
+      >
         <Tab key="profil" title="Profil">
           <div className="w-full max-w-2xl mx-auto mt-10">
             {customer && (
@@ -107,9 +116,7 @@ export default function Page() {
         </Tab>
         <Tab key="payment" title="Paiement">
           <div className="w-full container mx-auto mt-10">
-            <Card className="w-full ">
-              <CardBody>Paiement</CardBody>
-            </Card>
+            <PaiemnentTab paiements={paiements} />
           </div>
         </Tab>
         <Tab key="stat" title="Stat">
@@ -126,7 +133,7 @@ export default function Page() {
             </Card>
           </div>
         </Tab>
-      </Tabs>
+      </LBTabs>
     </div>
   );
 }

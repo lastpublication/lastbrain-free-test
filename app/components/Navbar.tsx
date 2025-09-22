@@ -2,6 +2,10 @@
 import {
   Badge,
   Button,
+  Dropdown,
+  DropdownItem,
+  DropdownMenu,
+  DropdownTrigger,
   Link,
   Navbar,
   NavbarBrand,
@@ -10,10 +14,14 @@ import {
   NavbarMenu,
   NavbarMenuItem,
   NavbarMenuToggle,
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
   Skeleton,
 } from "@heroui/react";
 import { ThemeSwitch } from "./SwitchMode";
 import {
+  FileText,
   Home,
   Power,
   ShoppingBag,
@@ -26,6 +34,8 @@ import { useRouter } from "next/navigation";
 import { useInfoSociety } from "../context/InfoSocietyContext";
 import { useAuth } from "../context/AuthContext";
 import axios from "axios";
+import { LBButton } from "./ui/Primitives";
+import { Loading } from "./Loading";
 
 export const NavbarComponent = () => {
   const infoSociety = useInfoSociety();
@@ -34,10 +44,23 @@ export const NavbarComponent = () => {
   const router = useRouter();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
+  const [menuProduct, SetMenuProduct] = useState<any | null>(null);
+
   const [mounted, setMounted] = useState(false);
+  const [openBoutique, setOpenBoutique] = useState(false);
+  const fetchMenu = async () => {
+    axios.get("/api/catalog").then((response) => {
+      SetMenuProduct(response.data.data || []);
+    });
+
+    axios.get("/api/article").then((response) => {
+      SetMenuProduct(response.data.data || []);
+    });
+  };
   useEffect(() => {
     setMounted(true);
-  }, []);
+    if (!menuProduct) fetchMenu();
+  }, [menuProduct]);
   useEffect(() => {
     const stored = localStorage.getItem("cart");
     if (stored) {
@@ -105,12 +128,15 @@ export const NavbarComponent = () => {
 
   if (!mounted) return null;
 
+  if (!menuProduct) return <Loading />;
+
   return (
     <Navbar
       isMenuOpen={isMenuOpen}
       onMenuOpenChange={setIsMenuOpen}
       shouldHideOnScroll
-      className=" glass shadow-none"
+      maxWidth="2xl"
+      className=" glass shadow-none "
       position="sticky"
     >
       <NavbarMenuToggle
@@ -131,7 +157,7 @@ export const NavbarComponent = () => {
                 <img
                   src={infoSociety.logo_url}
                   alt={infoSociety.name || "Mon Entreprise"}
-                  className="h-8"
+                  className="h-8 me-4"
                 />
                 {infoSociety?.name || "Mon Entreprise"}
               </>
@@ -147,72 +173,104 @@ export const NavbarComponent = () => {
       </NavbarBrand>
 
       <NavbarContent className="hidden sm:flex gap-4" justify="center">
+        <div
+          onMouseEnter={() => {
+            setOpenBoutique(true);
+          }}
+          onMouseLeave={() => setOpenBoutique(false)}
+        >
+          {menuProduct && menuProduct.length > 0 ? (
+            <Dropdown isOpen={openBoutique} onOpenChange={setOpenBoutique}>
+              <NavbarItem>
+                <DropdownTrigger>
+                  <LBButton
+                    as={Link}
+                    onPress={() => {
+                      router.push("/boutique");
+                    }}
+                    startContent={<ShoppingBag size={24} className="me-1" />}
+                  >
+                    Boutique
+                  </LBButton>
+                </DropdownTrigger>
+              </NavbarItem>
+              <DropdownMenu
+                aria-label={"Menu des catégories"}
+                itemClasses={{
+                  base: "gap-4",
+                }}
+              >
+                {menuProduct.map((category: any) => (
+                  <DropdownItem
+                    onPress={() => {
+                      setOpenBoutique(false);
+                      router.push(`/boutique/${category.slug}`);
+                    }}
+                    className="capitalize"
+                    key={category.id}
+                    description={category.description || undefined}
+                  >
+                    {category.name}
+                  </DropdownItem>
+                ))}
+              </DropdownMenu>
+            </Dropdown>
+          ) : (
+            <LBButton
+              as={Link}
+              onPress={() => {
+                router.push("/boutique");
+              }}
+              startContent={<ShoppingBag size={24} className="me-1" />}
+            >
+              Boutique
+            </LBButton>
+          )}
+        </div>
         <NavbarItem>
-          <Link
-            as={"button"}
+          <LBButton
+            as={Link}
             onPress={() => {
-              router.push("/produit");
+              router.push("/article");
             }}
-            color="foreground"
-            underline="hover"
+            startContent={<FileText size={24} className="me-1" />}
           >
-            Produit
-          </Link>
+            Article
+          </LBButton>
         </NavbarItem>
       </NavbarContent>
       <NavbarContent justify="end" className="gap-4">
-        <ThemeSwitch />
-
         {number > 0 ? (
-          <Badge content={number} color="primary" className="text-foreground">
-            <Button
+          <Badge content={number} color="secondary" className="text-foreground">
+            <LBButton
               onPress={() => {
                 router.push("/panier");
               }}
-              variant="light"
               isIconOnly
-              radius="full"
             >
               <ShoppingCart size={24} />
-            </Button>
+            </LBButton>
           </Badge>
         ) : (
-          <Button
-            as={Link}
-            isDisabled
-            href="/panier"
-            variant="light"
-            isIconOnly
-            radius="full"
-            color="primary"
-          >
+          <LBButton as={Link} isDisabled href="/panier" isIconOnly>
             <ShoppingCart size={24} />
-          </Button>
+          </LBButton>
         )}
         {!user && (
-          <Button
-            variant="light"
-            isIconOnly
-            radius="full"
-            onPress={() => router.push("/login")}
-          >
+          <LBButton isIconOnly onPress={() => router.push("/login")}>
             <User2 size={24} className="text-foreground" />
-          </Button>
+          </LBButton>
         )}
         {user && (
           <>
-            <Button
-              variant="light"
-              radius="full"
+            <LBButton
               className="hidden md:flex"
               onPress={() => router.push("/private")}
             >
               <User2 size={24} className="text-foreground" />
-              {user?.first_name || ""} {user?.last_name?.slice(0, 1) || ""}
-            </Button>
-            <Button
-              variant="light"
-              radius="full"
+              {user?.first_name || ""} {user?.last_name?.slice(0, 1) || ""}.
+            </LBButton>
+            <LBButton
               className="flex md:hidden"
               isIconOnly
               onPress={() => {
@@ -221,15 +279,14 @@ export const NavbarComponent = () => {
               }}
             >
               <User2 size={24} className="text-foreground" />
-            </Button>
+            </LBButton>
           </>
         )}
         {user && (
-          <Button
-            variant="light"
-            radius="full"
+          <LBButton
             isIconOnly
             className="hidden md:flex"
+            color="danger"
             onPress={() => {
               axios.post("/api/logout").then(() => {
                 localStorage.removeItem("cart");
@@ -239,9 +296,10 @@ export const NavbarComponent = () => {
               });
             }}
           >
-            <Power size={24} className="text-foreground" />
-          </Button>
+            <Power size={24} />
+          </LBButton>
         )}
+        <ThemeSwitch />
       </NavbarContent>
       <NavbarMenu className="pt-5 space-y-5">
         <NavbarMenuItem>
@@ -270,7 +328,22 @@ export const NavbarComponent = () => {
             color="foreground"
           >
             <ShoppingBag size={24} className="me-5" />
-            Produit
+            Boutique
+          </Link>
+        </NavbarMenuItem>
+        <NavbarMenuItem>
+          <Link
+            className="w-full text-2xl"
+            as={"button"}
+            onPress={() => {
+              setIsMenuOpen(false);
+
+              router.push("/produit");
+            }}
+            color="foreground"
+          >
+            <FileText size={24} className="me-5" />
+            Article
           </Link>
         </NavbarMenuItem>
         {!user && (

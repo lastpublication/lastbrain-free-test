@@ -45,13 +45,13 @@ export const ProjectTab = ({
                     <span>
                       {p.order?.ref || <X size={24} className="text-danger" />}
                     </span>
-                    <span className="text-muted">
+                    <span className="text-foreground">
                       {p.order?.amount_ttc.toFixed(2)} €
                     </span>
                   </div>
                 </TableCell>
                 <TableCell>
-                  <div className="flex flex-col  items-end justify-end">
+                  <div className="flex flex-col   items-end justify-end">
                     {invoices
                       .filter((i: any) => i.project_id === p.id)
                       .map((invoice: any) => (
@@ -59,7 +59,10 @@ export const ProjectTab = ({
                           key={invoice.id}
                           className="flex items-center gap-2"
                         >
-                          <span className="text-muted"> {invoice.ref}</span>{" "}
+                          <span className="text-foreground">
+                            {" "}
+                            {invoice.ref}
+                          </span>{" "}
                           <span>{invoice.amount_ttc.toFixed(2)} €</span>
                           <div>
                             {invoice.status === "paid" ? (
@@ -82,7 +85,7 @@ export const ProjectTab = ({
                       .filter((i: any) => i.project_id === p.id)
                       .map((avoir: any) => (
                         <div key={avoir.id} className="flex items-center gap-2">
-                          <span className="text-muted"> {avoir.ref}</span>{" "}
+                          <span className="text-foreground"> {avoir.ref}</span>{" "}
                           <span>{avoir.amount_ttc.toFixed(2)} €</span>
                           <div>
                             {avoir.status === "payed" ? (

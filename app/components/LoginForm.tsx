@@ -37,8 +37,10 @@ export const LoginForm = () => {
 
       if (response.data.profile) {
         setUser(response.data.profile);
+        console.log("User set in context:", response.data.profile);
+        setIsLoading(false);
         // router.push("/private");
-        router.refresh();
+        // router.refresh();
       } else {
         addToast({
           title: "Erreur",
