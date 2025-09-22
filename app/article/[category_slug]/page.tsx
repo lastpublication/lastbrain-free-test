@@ -3,16 +3,11 @@
 import { CardBody } from "@heroui/react";
 import axios from "axios";
 import { AnimatePresence, motion } from "framer-motion";
-import {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 
 import { LBCard, LBInput } from "../../components/ui/Primitives";
+import { Search } from "lucide-react";
 
 type Article = {
   id?: string | number;
@@ -96,14 +91,13 @@ export default function Page() {
 
     return articles.filter((article) => {
       const title = (article.title || article.name || "").toLowerCase();
-      const content =
-        (
-          article.excerpt ||
-          article.resume ||
-          article.description ||
-          article.content ||
-          ""
-        ).toLowerCase();
+      const content = (
+        article.excerpt ||
+        article.resume ||
+        article.description ||
+        article.content ||
+        ""
+      ).toLowerCase();
       return title.includes(term) || content.includes(term);
     });
   }, [articles, searchTerm]);
@@ -180,7 +174,7 @@ export default function Page() {
     const alt = article.title || article.name || "Article";
 
     return (
-      <div className="relative overflow-hidden rounded-3xl">
+      <div className="relative overflow-hidden ">
         <img
           src={src}
           alt={alt}
@@ -229,11 +223,7 @@ export default function Page() {
           value={searchTerm}
           onValueChange={setSearchTerm}
           className="w-full max-w-md"
-          startContent={
-            <span className="text-foreground/40" aria-hidden>
-              🔍
-            </span>
-          }
+          startContent={<Search className="h-4 w-4 text-foreground/40" />}
         />
       </div>
 
@@ -272,7 +262,9 @@ export default function Page() {
                         <p className="text-base font-semibold text-foreground">
                           {article.title || article.name}
                         </p>
-                        {(article.excerpt || article.resume || article.description) && (
+                        {(article.excerpt ||
+                          article.resume ||
+                          article.description) && (
                           <p className="text-sm text-foreground/70 overflow-hidden [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:3]">
                             {article.excerpt ||
                               article.resume ||

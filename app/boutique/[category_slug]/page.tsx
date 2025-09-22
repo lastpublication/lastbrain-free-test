@@ -3,16 +3,11 @@
 import { CardBody } from "@heroui/react";
 import axios from "axios";
 import { AnimatePresence, motion } from "framer-motion";
-import {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 
 import { LBCard, LBInput } from "../../components/ui/Primitives";
+import { Search } from "lucide-react";
 
 type Product = {
   id?: string | number;
@@ -94,7 +89,11 @@ export default function Page() {
 
     return products.filter((product) => {
       const name = (product.name || product.title || "").toLowerCase();
-      const description = (product.description || product.resume || "").toLowerCase();
+      const description = (
+        product.description ||
+        product.resume ||
+        ""
+      ).toLowerCase();
       return name.includes(term) || description.includes(term);
     });
   }, [products, searchTerm]);
@@ -172,7 +171,7 @@ export default function Page() {
     const alt = product.name || product.title || "Produit";
 
     return (
-      <div className="relative overflow-hidden rounded-3xl">
+      <div className="relative overflow-hidden ">
         <img
           src={src}
           alt={alt}
@@ -203,9 +202,9 @@ export default function Page() {
             {category_slug}
           </h1>
           <p className="mt-2 max-w-2xl text-base text-foreground/70">
-            Découvrez une sélection inspirante de produits présentés dans un
-            mur visuel immersif. Faites défiler pour explorer toutes les
-            pépites de la catégorie.
+            Découvrez une sélection inspirante de produits présentés dans un mur
+            visuel immersif. Faites défiler pour explorer toutes les pépites de
+            la catégorie.
           </p>
         </div>
         <LBInput
@@ -214,11 +213,8 @@ export default function Page() {
           value={searchTerm}
           onValueChange={setSearchTerm}
           className="w-full max-w-md"
-          startContent={
-            <span className="text-foreground/40" aria-hidden>
-              🔍
-            </span>
-          }
+          size="lg"
+          startContent={<Search className="h-4 w-4 text-foreground/40" />}
         />
       </div>
 
