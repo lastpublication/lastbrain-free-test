@@ -1,23 +1,24 @@
 "use client";
 import { useEffect, useState } from "react";
-import { Loading } from "../components/Loading";
+
 import { a } from "framer-motion/client";
-import { LBCard } from "../components/ui/Primitives";
+
 import { CardBody } from "@heroui/react";
-import { useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
+import { Loading } from "../../components/Loading";
+import { LBCard } from "../../components/ui/Primitives";
 import axios from "axios";
 
 export default function Page() {
-  const router = useRouter();
+  const params = useParams();
+  const category_slug = params.category_slug as string;
   const [articles, setArticles] = useState<any[] | null>(null);
   const fetchArticles = async () => {
-    const res = await axios
-      .get("/api/article")
+    await axios
+      .get(`/api/article?categorySlug=${category_slug}`)
       .then((res) => {
-        if (res.data.data) {
-          setArticles(res.data.data || []);
-          return;
-        }
+        console.log(res.data.data);
+        setArticles(res.data.data || []);
       })
       .catch(() => {
         setArticles([]);
@@ -36,12 +37,8 @@ export default function Page() {
         {Array.isArray(articles) &&
           articles.length > 0 &&
           articles.map((article, idx) => (
-            <LBCard
-              key={idx}
-              isPressable
-              onPress={() => router.push(`/article/${article.slug}`)}
-            >
-              <CardBody>{article.name}</CardBody>
+            <LBCard key={idx}>
+              <CardBody>{article.title}</CardBody>
             </LBCard>
           ))}
       </div>

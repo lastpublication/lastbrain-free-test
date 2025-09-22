@@ -1,4 +1,5 @@
 import axios from "axios";
+import { NextResponse } from "next/server";
 
 export async function GET(request: Request) {
   const token = process.env.X_LASTBRAIN_TOKEN;
@@ -48,12 +49,12 @@ export async function GET(request: Request) {
       response = response.data;
     }
 
-    return new Response(JSON.stringify(response), {
-      status: 200,
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
+    return NextResponse.json(
+      { response },
+      {
+        status: 200,
+      }
+    );
   } catch (error: any) {
     // Récupère le message d'erreur personnalisé si présent
     const apiError =

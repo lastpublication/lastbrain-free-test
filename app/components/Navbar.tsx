@@ -45,16 +45,26 @@ export const NavbarComponent = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const [menuProduct, SetMenuProduct] = useState<any | null>(null);
+  const [menuArticle, SetMenuArticle] = useState<any | null>(null);
 
   const [mounted, setMounted] = useState(false);
   const [openBoutique, setOpenBoutique] = useState(false);
+  const [openArticle, setOpenArticle] = useState(false);
   const fetchMenu = async () => {
     axios.get("/api/catalog").then((response) => {
-      SetMenuProduct(response.data.data || []);
+      if (response.data.data) {
+        SetMenuProduct(response.data.data || []);
+      } else {
+        SetMenuProduct([]);
+      }
     });
 
     axios.get("/api/article").then((response) => {
-      SetMenuProduct(response.data.data || []);
+      if (response.data) {
+        SetMenuArticle(response.data.data || []);
+      } else {
+        SetMenuArticle([]);
+      }
     });
   };
   useEffect(() => {
@@ -128,7 +138,7 @@ export const NavbarComponent = () => {
 
   if (!mounted) return null;
 
-  if (!menuProduct) return <Loading />;
+  if (!menuProduct && !menuArticle) return <Loading />;
 
   return (
     <Navbar
@@ -208,7 +218,6 @@ export const NavbarComponent = () => {
                     }}
                     className="capitalize"
                     key={category.id}
-                    description={category.description || undefined}
                   >
                     {category.name}
                   </DropdownItem>
@@ -227,17 +236,59 @@ export const NavbarComponent = () => {
             </LBButton>
           )}
         </div>
-        <NavbarItem>
-          <LBButton
-            as={Link}
-            onPress={() => {
-              router.push("/article");
-            }}
-            startContent={<FileText size={24} className="me-1" />}
-          >
-            Article
-          </LBButton>
-        </NavbarItem>
+        <div
+          onMouseEnter={() => {
+            setOpenArticle(true);
+          }}
+          onMouseLeave={() => setOpenArticle(false)}
+        >
+          {Array.isArray(menuArticle) && menuArticle.length > 0 ? (
+            <Dropdown isOpen={openArticle} onOpenChange={setOpenArticle}>
+              <NavbarItem>
+                <DropdownTrigger>
+                  <LBButton
+                    as={Link}
+                    onPress={() => {
+                      router.push("/article");
+                    }}
+                    startContent={<FileText size={24} className="me-1" />}
+                  >
+                    Article
+                  </LBButton>
+                </DropdownTrigger>
+              </NavbarItem>
+              <DropdownMenu
+                aria-label={"Menu des catégories"}
+                itemClasses={{
+                  base: "gap-4",
+                }}
+              >
+                {menuArticle.map((article: any) => (
+                  <DropdownItem
+                    onPress={() => {
+                      setOpenBoutique(false);
+                      router.push(`/article/${article.slug}`);
+                    }}
+                    className="capitalize"
+                    key={article.id}
+                  >
+                    {article.name}
+                  </DropdownItem>
+                ))}
+              </DropdownMenu>
+            </Dropdown>
+          ) : (
+            <LBButton
+              as={Link}
+              onPress={() => {
+                router.push("/article");
+              }}
+              startContent={<FileText size={24} className="me-1" />}
+            >
+              Article
+            </LBButton>
+          )}
+        </div>
       </NavbarContent>
       <NavbarContent justify="end" className="gap-4">
         {number > 0 ? (
@@ -323,7 +374,7 @@ export const NavbarComponent = () => {
             onPress={() => {
               setIsMenuOpen(false);
 
-              router.push("/produit");
+              router.push("/boutique");
             }}
             color="foreground"
           >
@@ -338,7 +389,7 @@ export const NavbarComponent = () => {
             onPress={() => {
               setIsMenuOpen(false);
 
-              router.push("/produit");
+              router.push("/article");
             }}
             color="foreground"
           >
