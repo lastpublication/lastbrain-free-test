@@ -32,7 +32,7 @@ export async function GET(request: NextRequest) {
     }
 
     return NextResponse.json(
-      { data: response.data.data, message: response.data.message },
+      { data: response.data, message: response.data.message },
       { status: 200 }
     );
   }

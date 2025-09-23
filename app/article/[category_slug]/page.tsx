@@ -18,8 +18,8 @@ type Article = {
   resume?: string;
   description?: string;
   content?: string;
-  image?: string;
-  cover?: string;
+  cover_image?: string;
+  image_legacy?: string;
   thumbnail?: string;
   picture?: string;
   url?: string;
@@ -46,8 +46,8 @@ function useResponsiveCols() {
     const mqLg = window.matchMedia("(min-width: 1024px)"); // lg
 
     const compute = () => {
-      if (mqLg.matches) return 4; // >= lg
-      if (mqMd.matches) return 3; // >= md
+      if (mqLg.matches) return 3; // >= lg
+      if (mqMd.matches) return 2; // >= md
       return 2; // < md
     };
 
@@ -180,10 +180,8 @@ export default function Page() {
 
   const renderImage = (article: Article) => {
     const src =
-      article.image ||
-      article.cover ||
-      article.thumbnail ||
-      article.picture ||
+      article.cover_image ||
+      article.image_legacy ||
       "https://images.unsplash.com/photo-1529333166437-7750a6dd5a70?auto=format&fit=crop&w=900&q=80";
     const alt = article.title || article.name || "Article";
 
@@ -197,7 +195,7 @@ export default function Page() {
         />
 
         <div className="pointer-events-none absolute inset-0 bg-gradient-to-t  from-content2 via-content2/10 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
-        <div className="px-2 bg-white/70 dark:bg-black/40 backdrop-blur-sm rounded-e-md pointer-events-none absolute  bottom-2 text-left text-lg font-semibold dark:text-white text-black hover:drop-shadow">
+        <div className="p-2 bg-white/50 w-2/3 dark:bg-black/40 backdrop-blur-sm rounded-e-lg pointer-events-none absolute  bottom-2 text-left text-lg font-semibold dark:text-white text-black hover:drop-shadow">
           {alt}
         </div>
       </div>
@@ -242,6 +240,7 @@ export default function Page() {
           aria-label="Rechercher un article"
           placeholder="Rechercher un article..."
           value={searchTerm}
+          size="lg"
           onValueChange={setSearchTerm}
           className="w-full max-w-md"
           startContent={<Search className="h-4 w-4 text-foreground/40" />}
