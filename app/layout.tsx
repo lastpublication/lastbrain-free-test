@@ -8,6 +8,7 @@ import { TriangleAlert } from "lucide-react";
 import AffProvider from "./context/AffContext";
 import { readAffiliateCookie } from "./utils/aff";
 import { GlobalProvider } from "./context/GlobalContext";
+import Link from "next/link";
 
 export const metadata = {
   title: "lastbrain - Site de démonstration",
@@ -42,6 +43,18 @@ export default function RootLayout({
                     <NavbarComponent />
                     {children}
                   </Suspense>
+                  <div className=" fixed bottom-0 left-0 right-0 bg-white/10 dark:bg-black/10 backdrop-blur-lg shadow">
+                    <div className="container mx-auto px-4 py-2">
+                      {/* Footer content goes here */}
+                      <div className="flex justify-end gap-4">
+                        <div className="hover:text-sm text-[.6em] transition-all  ease-out">
+                          <Link href="https://lastbrain.io">
+                            copyright © 2025 lastbrain
+                          </Link>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                 </AuthProvider>
               </Providers>
             </InfoSocietyProvider>

@@ -37,6 +37,34 @@ const sizeClasses = [
   "aspect-[5/4]",
 ];
 
+/** Détermine 2 / 3 / 4 colonnes selon le viewport (md / lg) */
+function useResponsiveCols() {
+  const [cols, setCols] = useState(2);
+
+  useEffect(() => {
+    const mqMd = window.matchMedia("(min-width: 768px)"); // md
+    const mqLg = window.matchMedia("(min-width: 1024px)"); // lg
+
+    const compute = () => {
+      if (mqLg.matches) return 4; // >= lg
+      if (mqMd.matches) return 3; // >= md
+      return 2; // < md
+    };
+
+    const update = () => setCols(compute());
+    update();
+
+    mqMd.addEventListener?.("change", update);
+    mqLg.addEventListener?.("change", update);
+    return () => {
+      mqMd.removeEventListener?.("change", update);
+      mqLg.removeEventListener?.("change", update);
+    };
+  }, []);
+
+  return cols;
+}
+
 export default function Page() {
   const params = useParams();
   const router = useRouter();
@@ -50,6 +78,8 @@ export default function Page() {
   const [isBatching, setIsBatching] = useState(false);
   const sentinelRef = useRef<HTMLDivElement | null>(null);
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const colCount = useResponsiveCols();
 
   const fetchArticles = useCallback(async () => {
     if (!category_slug) return;
@@ -68,12 +98,9 @@ export default function Page() {
         ? (rawArticles as any).data
         : [];
 
-      if (message) {
-        setError(message);
-      }
-
+      if (message) setError(message);
       setArticles(parsedArticles as Article[]);
-    } catch (err) {
+    } catch {
       setError("Erreur lors du chargement des articles");
       setArticles([]);
     } finally {
@@ -104,12 +131,8 @@ export default function Page() {
 
   useEffect(() => {
     setVisibleCount((prev) => {
-      if (filteredArticles.length === 0) {
-        return 0;
-      }
-      if (searchTerm) {
-        return Math.min(INITIAL_BATCH, filteredArticles.length);
-      }
+      if (filteredArticles.length === 0) return 0;
+      if (searchTerm) return Math.min(INITIAL_BATCH, filteredArticles.length);
       return Math.min(Math.max(prev, INITIAL_BATCH), filteredArticles.length);
     });
   }, [filteredArticles.length, searchTerm]);
@@ -124,9 +147,7 @@ export default function Page() {
   const loadMore = useCallback(() => {
     if (!hasMore || isBatching) return;
     setIsBatching(true);
-    if (timeoutRef.current) {
-      clearTimeout(timeoutRef.current);
-    }
+    if (timeoutRef.current) clearTimeout(timeoutRef.current);
     timeoutRef.current = setTimeout(() => {
       setVisibleCount((prev) =>
         Math.min(prev + BATCH_SIZE, filteredArticles.length)
@@ -142,25 +163,18 @@ export default function Page() {
     const observer = new IntersectionObserver(
       (entries) => {
         const [entry] = entries;
-        if (entry.isIntersecting) {
-          loadMore();
-        }
+        if (entry.isIntersecting) loadMore();
       },
       { rootMargin: "320px 0px" }
     );
 
     observer.observe(node);
-
-    return () => {
-      observer.disconnect();
-    };
+    return () => observer.disconnect();
   }, [loadMore]);
 
   useEffect(() => {
     return () => {
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
-      }
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
     };
   }, []);
 
@@ -174,15 +188,16 @@ export default function Page() {
     const alt = article.title || article.name || "Article";
 
     return (
-      <div className="relative overflow-hidden ">
+      <div className="relative overflow-hidden w-full">
         <img
           src={src}
           alt={alt}
           className="h-full w-full object-cover"
           loading="lazy"
         />
-        <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
-        <div className="pointer-events-none absolute inset-x-4 bottom-4 text-left text-lg font-semibold text-white drop-shadow">
+
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-t  from-content2 via-content2/10 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+        <div className="px-2 bg-white/70 dark:bg-black/40 backdrop-blur-sm rounded-e-md pointer-events-none absolute  bottom-2 text-left text-lg font-semibold dark:text-white text-black hover:drop-shadow">
           {alt}
         </div>
       </div>
@@ -192,18 +207,24 @@ export default function Page() {
   const handleCardPress = (article: Article) => {
     const articleSlug = article.slug || article.id?.toString();
     if (!articleSlug) {
-      if (article.url) {
+      if (article.url)
         window.open(article.url, "_blank", "noopener,noreferrer");
-      }
       return;
     }
-
     const target = article.slug
       ? `/article/${articleSlug}`
       : `/article/${category_slug}/${articleSlug}`;
-
     router.push(target);
   };
+
+  /** Répartition des articles dans N colonnes distinctes (idx % colCount) */
+  const columns = useMemo(() => {
+    const cols: Article[][] = Array.from({ length: colCount }, () => []);
+    visibleArticles.forEach((a, idx) => {
+      cols[idx % colCount].push(a);
+    });
+    return cols;
+  }, [visibleArticles, colCount]);
 
   return (
     <div className="mx-auto max-w-7xl px-4 pb-20 pt-10 md:px-6">
@@ -233,50 +254,64 @@ export default function Page() {
         </div>
       ) : (
         <>
-          <div className="[column-fill:_balance] columns-1 gap-6 sm:columns-2 xl:columns-3">
-            <AnimatePresence>
-              {visibleArticles.map((article, idx) => {
-                const key =
-                  article.slug || article.id || `${idx}-${category_slug}`;
-                const sizeClass = sizeClasses[idx % sizeClasses.length];
+          {/* Colonnes DISTINCTES 2 / 3 / 4 */}
+          <div className="flex gap-6">
+            {columns.map((col, cIdx) => (
+              <div
+                key={`col-${cIdx}`}
+                className="
+                  flex-1 min-w-0 flex flex-col gap-6
+                  w-1/2 md:w-1/3 lg:w-1/4
+                "
+              >
+                <AnimatePresence>
+                  {col.map((article, idxInCol) => {
+                    const key =
+                      article.slug ||
+                      article.id ||
+                      `${cIdx}-${idxInCol}-${category_slug}`;
+                    const sizeClass =
+                      sizeClasses[(idxInCol + cIdx) % sizeClasses.length];
 
-                return (
-                  <motion.div
-                    key={key}
-                    layout
-                    initial={{ opacity: 0, y: 24 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, scale: 0.95 }}
-                    transition={{ duration: 0.35, ease: "easeOut" }}
-                    className="group mb-6 block break-inside-avoid"
-                  >
-                    <LBCard
-                      isPressable
-                      onPress={() => handleCardPress(article)}
-                      className="overflow-hidden border border-foreground/5 bg-background/60 backdrop-blur-md shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
-                    >
-                      <div className={`w-full ${sizeClass}`}>
-                        {renderImage(article)}
-                      </div>
-                      <CardBody className="space-y-3 px-5 pb-5 pt-4 text-left">
-                        <p className="text-base font-semibold text-foreground">
-                          {article.title || article.name}
-                        </p>
-                        {(article.excerpt ||
-                          article.resume ||
-                          article.description) && (
-                          <p className="text-sm text-foreground/70 overflow-hidden [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:3]">
-                            {article.excerpt ||
+                    return (
+                      <motion.div
+                        key={key}
+                        layout
+                        initial={{ opacity: 0, y: 24 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, scale: 0.95 }}
+                        transition={{ duration: 0.35, ease: "easeOut" }}
+                        className="group"
+                      >
+                        <LBCard
+                          isPressable
+                          onPress={() => handleCardPress(article)}
+                          className="w-full overflow-hidden border border-default bg-content2 backdrop-blur-md shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
+                        >
+                          <div className={`w-full ${sizeClass}`}>
+                            {renderImage(article)}
+                          </div>
+                          <CardBody className="space-y-3 px-5 pb-5 pt-4 text-left">
+                            <p className="text-base font-semibold text-foreground">
+                              {article.title || article.name}
+                            </p>
+                            {(article.excerpt ||
                               article.resume ||
-                              article.description}
-                          </p>
-                        )}
-                      </CardBody>
-                    </LBCard>
-                  </motion.div>
-                );
-              })}
-            </AnimatePresence>
+                              article.description) && (
+                              <p className="text-sm text-foreground/70 overflow-hidden [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:3]">
+                                {article.excerpt ||
+                                  article.resume ||
+                                  article.description}
+                              </p>
+                            )}
+                          </CardBody>
+                        </LBCard>
+                      </motion.div>
+                    );
+                  })}
+                </AnimatePresence>
+              </div>
+            ))}
           </div>
 
           {!visibleArticles.length && (
@@ -294,17 +329,12 @@ export default function Page() {
         </>
       )}
 
+      {/* Sentinel pour l'infinite scroll */}
       <div ref={sentinelRef} aria-hidden className="h-1 w-full" />
 
       {hasMore && (
         <div className="flex items-center justify-center pt-10">
           <div className="h-10 w-10 animate-spin rounded-full border-2 border-secondary/40 border-t-secondary" />
-        </div>
-      )}
-
-      {!isLoading && !filteredArticles.length && error && (
-        <div className="mt-16 flex justify-center text-center text-foreground/70">
-          {error}
         </div>
       )}
     </div>

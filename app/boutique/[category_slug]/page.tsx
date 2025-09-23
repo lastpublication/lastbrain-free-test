@@ -35,6 +35,35 @@ const sizeClasses = [
   "aspect-[4/3]",
 ];
 
+/** Détermine 2 / 3 / 4 colonnes selon le viewport (md / lg) */
+function useResponsiveCols() {
+  const [cols, setCols] = useState(2); // default SSR-safe
+
+  useEffect(() => {
+    const mqMd = window.matchMedia("(min-width: 768px)"); // md
+    const mqLg = window.matchMedia("(min-width: 1024px)"); // lg
+
+    const compute = () => {
+      if (mqLg.matches) return 4; // > lg => 4 colonnes
+      if (mqMd.matches) return 3; // > md => 3 colonnes
+      return 2; // < md => 2 colonnes
+    };
+
+    const update = () => setCols(compute());
+
+    update();
+    mqMd.addEventListener?.("change", update);
+    mqLg.addEventListener?.("change", update);
+
+    return () => {
+      mqMd.removeEventListener?.("change", update);
+      mqLg.removeEventListener?.("change", update);
+    };
+  }, []);
+
+  return cols;
+}
+
 export default function Page() {
   const params = useParams();
   const category_slug = params.category_slug as string;
@@ -48,6 +77,8 @@ export default function Page() {
   const [isBatching, setIsBatching] = useState(false);
   const sentinelRef = useRef<HTMLDivElement | null>(null);
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const colCount = useResponsiveCols();
 
   const fetchProductCategory = useCallback(async () => {
     if (!category_slug) return;
@@ -178,8 +209,8 @@ export default function Page() {
           className="h-full w-full object-cover"
           loading="lazy"
         />
-        <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
-        <div className="pointer-events-none absolute inset-x-4 bottom-4 text-left text-lg font-semibold text-white drop-shadow">
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-content2 via-content2/10  to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+        <div className="px-2 bg-white/70 dark:bg-black/40 backdrop-blur-sm rounded-e-md pointer-events-none absolute  bottom-2 text-left text-lg font-semibold dark:text-white text-black hover:drop-shadow">
           {alt}
         </div>
       </div>
@@ -192,6 +223,15 @@ export default function Page() {
     if (!productId) return;
     router.push(`/boutique/${category_slug}/${productId}`);
   };
+
+  /** Répartition des produits dans N colonnes distinctes (idx % colCount) */
+  const columns = useMemo(() => {
+    const cols: Product[][] = Array.from({ length: colCount }, () => []);
+    visibleProducts.forEach((p, idx) => {
+      cols[idx % colCount].push(p);
+    });
+    return cols;
+  }, [visibleProducts, colCount]);
 
   return (
     <div className="mx-auto max-w-7xl px-4 pb-20 pt-10 md:px-6">
@@ -223,46 +263,59 @@ export default function Page() {
         </div>
       ) : (
         <>
-          <div className="[column-fill:_balance] columns-1 gap-6 sm:columns-2 xl:columns-3">
-            <AnimatePresence>
-              {visibleProducts.map((product, idx) => {
-                const key =
-                  product.code_product ||
-                  product.slug ||
-                  product.id ||
-                  `${idx}-${category_slug}`;
-                const sizeClass = sizeClasses[idx % sizeClasses.length];
+          {/* Conteneur en colonnes DISTINCTES (2 / 3 / 4) */}
+          <div className="flex gap-6">
+            {columns.map((col, cIdx) => (
+              <div
+                key={`col-${cIdx}`}
+                className="
+                  flex-1 min-w-0 flex flex-col gap-6
+                  w-1/2 md:w-1/3 lg:w-1/4
+                "
+              >
+                <AnimatePresence>
+                  {col.map((product, idxInCol) => {
+                    const key =
+                      product.code_product ||
+                      product.slug ||
+                      product.id ||
+                      `${cIdx}-${idxInCol}-${category_slug}`;
 
-                return (
-                  <motion.div
-                    key={key}
-                    layout
-                    initial={{ opacity: 0, y: 24 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, scale: 0.95 }}
-                    transition={{ duration: 0.35, ease: "easeOut" }}
-                    className="group mb-6 block break-inside-avoid"
-                  >
-                    <LBCard
-                      isPressable
-                      onPress={() => handleCardPress(product)}
-                      className="overflow-hidden border border-foreground/5 bg-background/60 backdrop-blur-md shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
-                    >
-                      <div className={`w-full ${sizeClass}`}>
-                        {renderImage(product)}
-                      </div>
-                      {(product.description || product.resume) && (
-                        <CardBody className="space-y-2 px-5 pb-5 pt-4 text-left">
-                          <p className="text-sm text-foreground/70 overflow-hidden [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:3]">
-                            {product.description || product.resume}
-                          </p>
-                        </CardBody>
-                      )}
-                    </LBCard>
-                  </motion.div>
-                );
-              })}
-            </AnimatePresence>
+                    const sizeClass =
+                      sizeClasses[(idxInCol + cIdx) % sizeClasses.length];
+
+                    return (
+                      <motion.div
+                        key={key}
+                        layout
+                        initial={{ opacity: 0, y: 24 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, scale: 0.95 }}
+                        transition={{ duration: 0.35, ease: "easeOut" }}
+                        className="group "
+                      >
+                        <LBCard
+                          isPressable
+                          onPress={() => handleCardPress(product)}
+                          className="overflow-hidden bg-content2 border border-default  backdrop-blur-md shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
+                        >
+                          <div className={`w-full ${sizeClass}`}>
+                            {renderImage(product)}
+                          </div>
+                          {(product.description || product.resume) && (
+                            <CardBody className="space-y-2 px-5 pb-5 pt-4 text-left">
+                              <p className="text-sm text-foreground/70 overflow-hidden [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:3]">
+                                {product.description || product.resume}
+                              </p>
+                            </CardBody>
+                          )}
+                        </LBCard>
+                      </motion.div>
+                    );
+                  })}
+                </AnimatePresence>
+              </div>
+            ))}
           </div>
 
           {!visibleProducts.length && (
@@ -280,17 +333,12 @@ export default function Page() {
         </>
       )}
 
+      {/* Sentinel pour l'infinite scroll */}
       <div ref={sentinelRef} aria-hidden className="h-1 w-full" />
 
       {hasMore && (
         <div className="flex items-center justify-center pt-10">
           <div className="h-10 w-10 animate-spin rounded-full border-2 border-secondary/40 border-t-secondary" />
-        </div>
-      )}
-
-      {!isLoading && !filteredProducts.length && error && (
-        <div className="mt-16 flex justify-center text-center text-foreground/70">
-          {error}
         </div>
       )}
     </div>
