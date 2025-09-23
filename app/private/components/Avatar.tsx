@@ -43,7 +43,6 @@ export const Avatar = ({
     axios
       .post("/api/upload", formData)
       .then((response) => {
-        console.log("Upload response:", response.data.data);
         setImageUrl(response.data.data.avatar);
         upload(response.data.data.avatar);
       })

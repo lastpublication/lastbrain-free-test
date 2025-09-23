@@ -32,7 +32,6 @@ export default function Page() {
   const [isLoading, setIsLoading] = useState(true);
   const { isOpen, onOpenChange, onClose } = useDisclosure();
   useEffect(() => {
-    console.log("Fetching product", code_product);
     if (code_product) {
       fetch(`/api/product?code_product=${code_product}`)
         .then((res) => res.json())

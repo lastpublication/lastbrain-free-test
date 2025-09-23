@@ -77,11 +77,9 @@ export default function CustomerForm({
           initialValues={customer}
           validationSchema={validationSchema}
           onSubmit={(values) => {
-            console.log("Form submitted with values:", values);
             axios
               .put("/api/customer", values)
               .then((response) => {
-                console.log("Form submitted successfully:", response.data);
                 setCustomer(response.data);
                 addToast({
                   title: "Succès",
@@ -101,7 +99,6 @@ export default function CustomerForm({
               <Avatar
                 src={values.avatar}
                 upload={(url: string) => {
-                  console.log("Avatar uploaded:", url);
                   values.avatar = url;
                 }}
               />

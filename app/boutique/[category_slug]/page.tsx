@@ -190,7 +190,6 @@ export default function Page() {
     const productId =
       product.code_product || product.slug || product.id?.toString();
     if (!productId) return;
-
     router.push(`/boutique/${category_slug}/${productId}`);
   };
 

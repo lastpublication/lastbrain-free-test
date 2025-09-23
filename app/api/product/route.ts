@@ -46,15 +46,11 @@ export async function GET(request: Request) {
             : undefined,
         },
       });
-      response = response.data;
     }
 
-    return NextResponse.json(
-      { response },
-      {
-        status: 200,
-      }
-    );
+    return NextResponse.json(response, {
+      status: 200,
+    });
   } catch (error: any) {
     // Récupère le message d'erreur personnalisé si présent
     const apiError =

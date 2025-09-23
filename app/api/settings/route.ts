@@ -4,7 +4,7 @@ export async function GET(request: Request) {
   try {
     const token = process.env.X_LASTBRAIN_TOKEN;
     const apiUrl = process.env.API_URL;
-    console.log("API URL:", `${apiUrl}api/settings-domain`);
+
     const response = await axios.get(`${apiUrl}api/settings-domain`, {
       headers: {
         "x-lastbrain-token": token,

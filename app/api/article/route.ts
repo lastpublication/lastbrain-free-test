@@ -52,6 +52,6 @@ export async function GET(request: NextRequest) {
       },
     });
   }
-  console.log(response.data);
+
   return NextResponse.json({ data: response.data }, { status: 200 });
 }

@@ -130,7 +130,7 @@ export default function PanierPage() {
       ...values,
       name: `${values.first_name} ${values.last_name}`,
     };
-    console.log("Customer Society:", customer.note);
+
     axios
       .get("/api/paiement", {
         params: {
