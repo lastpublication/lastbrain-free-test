@@ -8,6 +8,7 @@ import { useParams, useRouter } from "next/navigation";
 
 import { LBCard, LBInput } from "../../components/ui/Primitives";
 import { Search } from "lucide-react";
+import { Loading } from "../../components/Loading";
 
 type Product = {
   id?: string | number;
@@ -258,9 +259,7 @@ export default function Page() {
       </div>
 
       {isLoading ? (
-        <div className="flex min-h-[50vh] items-center justify-center">
-          <div className="h-12 w-12 animate-spin rounded-full border-2 border-secondary/40 border-t-secondary" />
-        </div>
+        <Loading />
       ) : (
         <>
           {/* Conteneur en colonnes DISTINCTES (2 / 3 / 4) */}
@@ -303,11 +302,11 @@ export default function Page() {
                             {renderImage(product)}
                           </div>
                           {(product.description || product.resume) && (
-                            <CardBody className="space-y-2 px-5 pb-5 pt-4 text-left">
+                            <div className="space-y-2 px-5 pb-5 pt-4 text-left">
                               <p className="text-sm text-foreground/70 overflow-hidden [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:3]">
                                 {product.description || product.resume}
                               </p>
-                            </CardBody>
+                            </div>
                           )}
                         </LBCard>
                       </motion.div>

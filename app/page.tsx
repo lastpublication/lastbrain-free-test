@@ -41,7 +41,7 @@ export default function Home() {
   return (
     <main className="flex min-h-screen items-center justify-center p-6 ">
       <LBCard className="max-w-3xl p-4">
-        <CardBody className="flex flex-col items-center text-center gap-6">
+        <div className="flex flex-col items-center text-center gap-6">
           {logo_url && (
             <Image
               src={logo_url}
@@ -108,7 +108,7 @@ export default function Home() {
           <LBButton as={Link} href="/produit" color="default" className="mt-6">
             Découvrir les produits
           </LBButton>
-        </CardBody>
+        </div>
       </LBCard>
     </main>
   );

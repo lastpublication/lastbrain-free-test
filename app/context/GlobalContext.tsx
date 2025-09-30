@@ -17,6 +17,7 @@ interface GlobalContextValue {
   setRadius: (v: "none" | "sm" | "md" | "lg" | "full") => void;
   setVariantBtn: (v: string) => void;
   setVariantComponent: (v: string) => void;
+  isMobile: boolean;
 }
 
 export const GlobalContext = createContext<GlobalContextValue | null>(null);
@@ -111,6 +112,7 @@ function applyThemeCss(
 
 export function GlobalProvider({ children }: { children: React.ReactNode }) {
   const [global, setGlobal] = useState<any>(null);
+  const [isMobile, setIsMobile] = useState(false);
   const [radius, setRadius] = useState<"none" | "sm" | "md" | "lg" | "full">(
     "md"
   );
@@ -122,6 +124,14 @@ export function GlobalProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     if (typeof window === "undefined") return;
+
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+
+    window.addEventListener("resize", handleResize);
+    handleResize(); // Call once on mount
+
     const root = document.documentElement;
     // Bridge to Tailwind/HeroUI runtime vars as well
     root.style.setProperty("--lb-radius", radius as string);
@@ -182,6 +192,7 @@ export function GlobalProvider({ children }: { children: React.ReactNode }) {
         setRadius,
         setVariantBtn,
         setVariantComponent,
+        isMobile,
       }}
     >
       {children}

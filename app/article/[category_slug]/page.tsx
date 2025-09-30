@@ -8,6 +8,7 @@ import { useParams, useRouter } from "next/navigation";
 
 import { LBCard, LBInput } from "../../components/ui/Primitives";
 import { Search } from "lucide-react";
+import { Loading } from "../../components/Loading";
 
 type Article = {
   id?: string | number;
@@ -86,7 +87,7 @@ export default function Page() {
     setIsLoading(true);
     setError(null);
     try {
-      const response = await axios.get("/api/article", {
+      const response = await axios.get("/api/category", {
         params: { categorySlug: category_slug },
       });
 
@@ -195,7 +196,7 @@ export default function Page() {
         />
 
         <div className="pointer-events-none absolute inset-0 bg-gradient-to-t  from-content2 via-content2/10 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
-        <div className="p-2 bg-white/50 w-2/3 dark:bg-black/40 backdrop-blur-sm rounded-e-lg pointer-events-none absolute  bottom-2 text-left text-lg font-semibold dark:text-white text-black hover:drop-shadow">
+        <div className="p-2 bg-white/50 w-2/3 dark:bg-black/40 backdrop-blur-sm rounded-e-lg pointer-events-none absolute  bottom-2 text-left md:text-lg font-semibold dark:text-white text-black hover:drop-shadow">
           {alt}
         </div>
       </div>
@@ -209,9 +210,7 @@ export default function Page() {
         window.open(article.url, "_blank", "noopener,noreferrer");
       return;
     }
-    const target = article.slug
-      ? `/article/${articleSlug}`
-      : `/article/${category_slug}/${articleSlug}`;
+    const target = `/article/${category_slug}/${articleSlug}`;
     router.push(target);
   };
 
@@ -225,7 +224,7 @@ export default function Page() {
   }, [visibleArticles, colCount]);
 
   return (
-    <div className="mx-auto max-w-7xl px-4 pb-20 pt-10 md:px-6">
+    <div className="mx-auto max-w-7xl px-2 pb-20 pt-10 md:px-6">
       <div className="mb-10 flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
         <div>
           <h1 className="text-3xl font-bold capitalize md:text-4xl">
@@ -248,18 +247,16 @@ export default function Page() {
       </div>
 
       {isLoading ? (
-        <div className="flex min-h-[50vh] items-center justify-center">
-          <div className="h-12 w-12 animate-spin rounded-full border-2 border-secondary/40 border-t-secondary" />
-        </div>
+        <Loading />
       ) : (
         <>
           {/* Colonnes DISTINCTES 2 / 3 / 4 */}
-          <div className="flex gap-6">
+          <div className="flex gap-2 md:gap-6">
             {columns.map((col, cIdx) => (
               <div
                 key={`col-${cIdx}`}
                 className="
-                  flex-1 min-w-0 flex flex-col gap-6
+                  flex-1 min-w-0 flex flex-col gap-2 md:gap-6
                   w-1/2 md:w-1/3 lg:w-1/4
                 "
               >
@@ -290,10 +287,10 @@ export default function Page() {
                           <div className={`w-full ${sizeClass}`}>
                             {renderImage(article)}
                           </div>
-                          <CardBody className="space-y-3 px-5 pb-5 pt-4 text-left">
-                            <p className="text-base font-semibold text-foreground">
+                          <div className="space-y-3 px-5 pb-5 pt-4 text-left">
+                            {/* <p className="text-base font-semibold text-foreground">
                               {article.title || article.name}
-                            </p>
+                            </p> */}
                             {(article.excerpt ||
                               article.resume ||
                               article.description) && (
@@ -303,7 +300,7 @@ export default function Page() {
                                   article.description}
                               </p>
                             )}
-                          </CardBody>
+                          </div>
                         </LBCard>
                       </motion.div>
                     );

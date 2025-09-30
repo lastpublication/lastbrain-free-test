@@ -11,8 +11,8 @@ export default function Page() {
   const router = useRouter();
   const [articles, setArticles] = useState<any[] | null>(null);
   const fetchArticles = async () => {
-    const res = await axios
-      .get("/api/article")
+    await axios
+      .get("/api/category")
       .then((res) => {
         if (res.data.data) {
           setArticles(res.data.data || []);
@@ -41,7 +41,7 @@ export default function Page() {
               isPressable
               onPress={() => router.push(`/article/${article.slug}`)}
             >
-              <CardBody>{article.name}</CardBody>
+              <div>{article.name}</div>
             </LBCard>
           ))}
       </div>

@@ -122,14 +122,14 @@ export default function Page() {
         <Tab key="stat" title="Stat">
           <div className="w-full container mx-auto mt-10">
             <Card className="w-full">
-              <CardBody>Stat</CardBody>
+              <div>Stat</div>
             </Card>
           </div>
         </Tab>
         <Tab key="message" title="Message">
           <div className="w-full container mx-auto mt-10">
             <Card className="w-full">
-              <CardBody>Message</CardBody>
+              <div>Message</div>
             </Card>
           </div>
         </Tab>

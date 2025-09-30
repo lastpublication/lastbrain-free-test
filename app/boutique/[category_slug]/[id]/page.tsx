@@ -22,6 +22,7 @@ import { useAuth } from "../../../context/AuthContext";
 import { AnimatePresence, motion } from "framer-motion";
 import { LBButton, LBCard } from "../../../components/ui/Primitives";
 import { ShoppingCart } from "lucide-react";
+import { Loading } from "../../../components/Loading";
 
 export default function Page() {
   const params = useParams();
@@ -87,12 +88,7 @@ export default function Page() {
     window.dispatchEvent(new Event("cartUpdated"));
   };
 
-  if (!product && isLoading)
-    return (
-      <div className="flex items-center justify-center text-gray-400 min-h-[70vh]">
-        <Spinner color="secondary" />
-      </div>
-    );
+  if (!product && isLoading) return <Loading />;
   if (!product && !isLoading) {
     return (
       <div className="flex items-center justify-center text-gray-400 min-h-[70vh]">
@@ -155,15 +151,15 @@ export default function Page() {
         </div>
         {/* Infos produit */}
         <LBCard className="hover:scale-105 hover:shadow-lg transition-all">
-          <CardHeader className="flex flex-col items-start gap-1">
+          <div className="flex flex-col items-start gap-1 p-4">
             <h1 className="text-3xl font-bold capitalize">{product.name}</h1>
             {product.code_product && (
               <p className="text-xs text-gray-400">
                 Code produit : {product.code_product}
               </p>
             )}
-          </CardHeader>
-          <CardBody className="space-y-4 p-4 h-full flex flex-col justify-between">
+          </div>
+          <div className="space-y-4 p-4 h-full flex flex-col justify-between">
             {product.description && (
               <div
                 className="flex-1 prose prose-sm max-w-none text-black/80 dark:text-white/60"
@@ -235,7 +231,7 @@ export default function Page() {
                 </LBButton>
               </Tooltip>
             )}
-          </CardBody>
+          </div>
         </LBCard>
       </div>
 

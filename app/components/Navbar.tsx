@@ -59,7 +59,7 @@ export const NavbarComponent = () => {
       }
     });
 
-    axios.get("/api/article").then((response) => {
+    axios.get("/api/category").then((response) => {
       if (response.data) {
         SetMenuArticle(response.data.data || []);
       } else {

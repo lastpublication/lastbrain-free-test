@@ -35,14 +35,14 @@ export default function Page() {
               key={category.id}
               className="p-4 border mb-4 hover:scale-105 hover:border-secondary"
             >
-              <CardHeader className="mb-2">
+              <div className="mb-2">
                 <h2 className="capitalize text-2xl font-bold mb-2">
                   {category.name}
                 </h2>
-              </CardHeader>
-              <CardBody>
+              </div>
+              <div>
                 <p>{category.description}</p>
-              </CardBody>
+              </div>
             </LBCard>
           ))}
       </div>

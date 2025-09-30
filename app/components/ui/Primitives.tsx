@@ -37,6 +37,7 @@ LBInput.displayName = "LBInput";
 export const LBButton = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ({ radius, variant, ...rest }, ref) => {
     const { radius: r, variantBtn } = useGlobal();
+    console.log(variantBtn);
     return (
       <Button
         ref={ref}

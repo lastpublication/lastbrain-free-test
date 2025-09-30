@@ -66,7 +66,7 @@ export const LoginForm = () => {
   }, [user]);
   return (
     <LBCard>
-      <CardBody className="flex flex-col items-center justify-center p-6">
+      <div className="flex flex-col items-center justify-center p-6">
         <Formik
           initialValues={{ email: "", password: "" }}
           validationSchema={validationSchema}
@@ -128,7 +128,7 @@ export const LoginForm = () => {
             </Form>
           )}
         </Formik>
-      </CardBody>
+      </div>
     </LBCard>
   );
 };

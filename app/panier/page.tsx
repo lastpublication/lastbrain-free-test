@@ -18,7 +18,12 @@ import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import { LoginForm } from "../components/LoginForm";
 import { useAuth } from "../context/AuthContext";
-import { LBButton, LBInput, LBTextarea } from "../components/ui/Primitives";
+import {
+  LBButton,
+  LBCard,
+  LBInput,
+  LBTextarea,
+} from "../components/ui/Primitives";
 
 export default function PanierPage() {
   const { user, isDemo } = useAuth();
@@ -246,8 +251,8 @@ export default function PanierPage() {
           {!user && (
             <>
               <LoginForm />
-              <Card className="my-6">
-                <CardBody className="p-5">
+              <LBCard className="my-6">
+                <div className="p-5">
                   <Formik
                     initialValues={customerSociety}
                     validationSchema={validationSchema}
@@ -439,8 +444,8 @@ export default function PanierPage() {
                       </Form>
                     )}
                   </Formik>
-                </CardBody>
-              </Card>
+                </div>
+              </LBCard>
             </>
           )}
 

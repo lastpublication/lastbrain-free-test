@@ -13,6 +13,7 @@ import { useEffect } from "react";
 import axios from "axios";
 import { Avatar } from "./Avatar";
 import { Ban } from "lucide-react";
+import { LBCard } from "../../components/ui/Primitives";
 
 const initialValues = {
   siret: "",
@@ -71,8 +72,8 @@ export default function CustomerForm({
     );
   }
   return (
-    <Card className="w-full  p-2 md:p-8">
-      <CardBody>
+    <LBCard className="w-full  p-2 md:p-8">
+      <div>
         <Formik
           initialValues={customer}
           validationSchema={validationSchema}
@@ -267,7 +268,7 @@ export default function CustomerForm({
             </Form>
           )}
         </Formik>
-      </CardBody>
-    </Card>
+      </div>
+    </LBCard>
   );
 }

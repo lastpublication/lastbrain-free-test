@@ -177,3 +177,114 @@ h3,
     transition: none;
   }
 }
+
+
+/* Ajoute ceci dans ton CSS global */
+.ProseMirror {
+  outline: none;
+  min-height: 20rem;
+  color: inherit;
+  background: transparent;
+  font-size: 1rem;
+  line-height: 1.7;
+  padding: 0;
+}
+
+.ProseMirror h1,
+.ProseMirror h2,
+.ProseMirror h3,
+.ProseMirror p {
+  margin-top: 0.5em;
+  margin-bottom: 0.5em;
+}
+
+.ProseMirror strong {
+  font-weight: bold;
+}
+
+/* Force reveal: animate sections inside client-rendered docs
+   Overrides possible inline styles (opacity/transform) and applies
+   a smooth transition so elements animate from hidden -> visible.
+*/
+.client-content>section,
+.client-content section,
+.client-content [data-reveal],
+.client-content>*>section {
+  opacity: 1 !important;
+  transform: none !important;
+  transition:
+    opacity 420ms cubic-bezier(0.2, 0.9, 0.2, 1),
+    transform 420ms cubic-bezier(0.2, 0.9, 0.2, 1);
+  will-change: opacity, transform;
+}
+
+/* If you prefer to only target elements that have inline styles hiding them, use:
+   .client-content [style*="opacity: 0"] { ... }
+   but the above selectors are broader and safe for most doc layouts.
+*/
+.ProseMirror h1 {
+  font-size: 2rem;
+}
+
+.ProseMirror h2 {
+  font-size: 1.5rem;
+}
+
+.ProseMirror h3 {
+  font-size: 1.2rem;
+}
+
+.ProseMirror h1>strong {
+  font-weight: bold;
+}
+
+.ProseMirror h2>strong {
+  font-weight: bold;
+}
+
+.ProseMirror h3>strong {
+  font-weight: bold;
+}
+
+.ProseMirror ul,
+.ProseMirror ol {
+  margin: 1em 0 1em 2em;
+}
+
+.ProseMirror li {
+  margin: 0.2em 0;
+}
+
+
+.ProseMirror blockquote {
+  border-left: 3px solid #ccc;
+  margin: 1em 0;
+  padding-left: 1em;
+  color: #888;
+}
+
+.ProseMirror strong {
+  font-weight: bold;
+}
+
+.ProseMirror em {
+  font-style: italic;
+}
+
+.ProseMirror ul,
+.ProseMirror ol {
+  margin: 1em 0 1em 2em;
+  padding-left: 2em;
+}
+
+.ProseMirror ul {
+  list-style-type: disc;
+}
+
+.ProseMirror ol {
+  list-style-type: decimal;
+}
+
+.ProseMirror li {
+  margin: 0.2em 0;
+}
