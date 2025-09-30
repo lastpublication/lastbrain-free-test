@@ -123,7 +123,7 @@ export default function Page() {
               ) : (
                 <motion.img
                   key={"placeholder"}
-                  src="https://lastbrain.io/img/website/placeholder.png"
+                  src="https://lastbrain.io/img/website/placeholder.webp"
                   alt={product.name}
                   className="w-full h-full object-contain"
                   initial={{ opacity: 0 }}
@@ -141,7 +141,7 @@ export default function Page() {
                 <Image
                   key={i}
                   src={
-                    img || "https://lastbrain.io/img/website/placeholder.png"
+                    img || "https://lastbrain.io/img/website/placeholder.webp"
                   }
                   alt={product.name + " galerie " + i}
                   className={

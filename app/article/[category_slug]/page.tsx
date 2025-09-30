@@ -183,7 +183,7 @@ export default function Page() {
     const src =
       article.cover_image ||
       article.image_legacy ||
-      "https://images.unsplash.com/photo-1529333166437-7750a6dd5a70?auto=format&fit=crop&w=900&q=80";
+      "https://lastbrain.io/img/website/placeholder.webp";
     const alt = article.title || article.name || "Article";
 
     return (

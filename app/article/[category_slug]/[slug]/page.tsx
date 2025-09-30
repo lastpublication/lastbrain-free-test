@@ -101,7 +101,10 @@ export default function Page() {
                   {article.cover_image ? (
                     <div className="w-full h-72 sm:h-96 lg:h-[32rem] relative overflow-hidden">
                       <img
-                        src={article.cover_image}
+                        src={
+                          article.cover_image ||
+                          "https://lastbrain.io/img/website/placeholder.webp"
+                        }
                         alt={article.title || "cover"}
                         className="w-full h-full object-cover"
                       />

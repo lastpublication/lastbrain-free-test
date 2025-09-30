@@ -198,7 +198,7 @@ export default function Page() {
       product.cover ||
       product.thumbnail ||
       product.picture ||
-      "https://lastbrain.io/img/website/placeholder.png";
+      "https://lastbrain.io/img/website/placeholder.webp";
 
     const alt = product.name || product.title || "Produit";
 
