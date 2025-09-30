@@ -11,8 +11,14 @@
     "ci-check": "pnpm install --frozen-lockfile && pnpm run type-check && pnpm run build"
   },
   "dependencies": {
+    "@heroui/button": "2.2.26",
+    "@heroui/card": "2.2.24",
+    "@heroui/chip": "2.2.21",
+    "@heroui/input": "2.4.27",
     "@heroui/react": "^2.7.8",
+    "@heroui/select": "2.4.27",
     "@heroui/switch": "2.2.23",
+    "@heroui/tabs": "2.2.23",
     "@react-aria/ssr": "3.9.10",
     "@react-aria/visually-hidden": "3.8.27",
     "@stripe/react-stripe-js": "^3.7.0",
