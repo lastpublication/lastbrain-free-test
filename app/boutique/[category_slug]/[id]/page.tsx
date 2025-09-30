@@ -121,14 +121,16 @@ export default function Page() {
                   transition={{ duration: 0.3 }}
                 />
               ) : (
-                <motion.div
-                  key="placeholder"
-                  className="text-gray-400"
+                <motion.img
+                  key={"placeholder"}
+                  src="https://lastbrain.io/img/website/placeholder.png"
+                  alt={product.name}
+                  className="w-full h-full object-contain"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
-                >
-                  Aucune image disponible
-                </motion.div>
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.3 }}
+                />
               )}
             </AnimatePresence>
           </div>
@@ -138,7 +140,9 @@ export default function Page() {
               product.gallery.map((img: string, i: number) => (
                 <Image
                   key={i}
-                  src={img}
+                  src={
+                    img || "https://lastbrain.io/img/website/placeholder.png"
+                  }
                   alt={product.name + " galerie " + i}
                   className={
                     "w-20 h-20 object-cover rounded-md border cursor-pointer hover:opacity-80 transition " +

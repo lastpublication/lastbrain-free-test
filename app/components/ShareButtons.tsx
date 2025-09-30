@@ -17,6 +17,7 @@ import {
   ModalHeader,
   useDisclosure,
 } from "@heroui/react";
+import { useGlobal } from "../context/GlobalContext";
 
 type Props = {
   articleSelector?: string;
@@ -25,7 +26,7 @@ type Props = {
 export const ShareButtons = ({ articleSelector = "article" }: Props) => {
   const { isOpen, onOpenChange } = useDisclosure();
   const [isExporting, setIsExporting] = useState(false);
-
+  const { isMobile } = useGlobal();
   const currentUrl = typeof window !== "undefined" ? window.location.href : "";
 
   const [copied, setCopied] = useState(false);
@@ -878,7 +879,7 @@ coller l'élément cmd + V | ctrl + V
         <LBButton
           data-export-ignore="true"
           size="lg"
-          color="primary"
+          color="secondary"
           startContent={<Share2 />}
           className="px-3 py-1 w-full"
           onPress={() => onOpenChange()}
@@ -887,7 +888,12 @@ coller l'élément cmd + V | ctrl + V
         </LBButton>
       </div>
 
-      <Modal backdrop="blur" isOpen={isOpen} onOpenChange={onOpenChange}>
+      <Modal
+        size={isMobile ? "full" : "lg"}
+        backdrop="blur"
+        isOpen={isOpen}
+        onOpenChange={onOpenChange}
+      >
         <ModalContent>
           <ModalHeader>{"Partager l'article"}</ModalHeader>
           <ModalBody className="p-4">

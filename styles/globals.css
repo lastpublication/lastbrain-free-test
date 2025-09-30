@@ -1,22 +1,7 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-/* 
-html {
-  background: var(--lb-color-background, #ffffff);
-  color: var(--lb-color-foreground, #111111);
-  transition: background-color 0.25s ease, color 0.25s ease;
-}
-html.dark {
-  background: #18181b;
-  color-scheme: dark;
-} */
+@config "../tailwind.config.js";
+/* chemin depuis app/globals.css vers la racine */
+@import "tailwindcss";
 
-/* ------------------------------
-   LastBrain Theme – defaults
-   These are fallback values; they will be overridden at runtime
-   by the inline <style id="lb-theme-style"> injected from GlobalProvider
---------------------------------- */
 :root {
   /* Typography */
   --lb-font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica,
