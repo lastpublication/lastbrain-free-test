@@ -1,15 +1,17 @@
 "use client";
-import { addToast, Button, Card, CardBody, Input } from "@heroui/react";
+import { addToast } from "@heroui/react";
 import axios from "axios";
 import { Form, Formik } from "formik";
-import { Triangle, TriangleAlert } from "lucide-react";
-import { useEffect, useState } from "react";
+
+import { useEffect, useState, useRef } from "react";
 
 import * as Yup from "yup";
 import { useAuth } from "../context/AuthContext";
 import { useRouter } from "next/navigation";
-import { useGlobal } from "../context/GlobalContext";
+
 import { LBButton, LBCard, LBInput } from "./ui/Primitives";
+import HCaptcha from "@hcaptcha/react-hcaptcha";
+
 export const LoginForm = () => {
   const { user, setUser } = useAuth();
   const validationSchema = Yup.object({
@@ -18,8 +20,10 @@ export const LoginForm = () => {
   });
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  const hcaptchaRef = useRef<any>(null);
   const onSubmit = async (
-    values: { email: string; password: string },
+    values: { email: string; password: string; captchaToken: string },
     {
       setFieldValue,
       setFieldError,
@@ -51,11 +55,34 @@ export const LoginForm = () => {
         });
       }
     } catch (error: any) {
-      setFieldError(
-        "password",
-        error.response?.data?.details || "Une erreur est survenue"
-      );
+      // upstream details can be a string or an object like { error: '...' } or { message: '...' }
+      const details = error?.response?.data?.details;
+      let message = "Une erreur est survenue";
+
+      if (details) {
+        if (typeof details === "string") {
+          message = details;
+        } else if (typeof details === "object") {
+          // prefer common fields
+          message = details.error || details.message || JSON.stringify(details);
+        }
+      } else if (error?.response?.data) {
+        message = error.response.data.message || message;
+      } else if (error?.message) {
+        message = error.message;
+      }
+
+      setFieldError("password", message);
       setIsLoading(false);
+
+      // reset captcha token so user must re-validate
+      setCaptchaToken(null);
+      try {
+        hcaptchaRef.current?.resetCaptcha?.();
+        hcaptchaRef.current?.reset?.();
+      } catch {
+        // ignore
+      }
     }
   };
 
@@ -68,7 +95,7 @@ export const LoginForm = () => {
     <LBCard>
       <div className="flex flex-col items-center justify-center p-6">
         <Formik
-          initialValues={{ email: "", password: "" }}
+          initialValues={{ email: "", password: "", captchaToken: "" }}
           validationSchema={validationSchema}
           onSubmit={onSubmit}
           enableReinitialize
@@ -115,13 +142,27 @@ export const LoginForm = () => {
                 value={values.password}
                 onChange={handleChange}
               />
-
+              <div className="mx-auto my-4">
+                <HCaptcha
+                  ref={hcaptchaRef}
+                  sitekey={process.env.NEXT_PUBLIC_HCAPTCHA_SITE_KEY!}
+                  onVerify={(token) => {
+                    console.log("Captcha verified:", token);
+                    setCaptchaToken(token);
+                    // also set Formik field value so onSubmit receives it
+                    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                    // @ts-ignore
+                    setFieldValue?.("captchaToken", token);
+                  }}
+                />
+              </div>
               <LBButton
                 type="submit"
                 color="success"
                 className="w-full"
                 size="lg"
                 isLoading={isLoading}
+                isDisabled={!captchaToken}
               >
                 Se connecter
               </LBButton>

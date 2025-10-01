@@ -20,16 +20,30 @@ import { useEffect, useState } from "react";
 import { calculPriceTTC } from "../../../utils/calculTva";
 import { useAuth } from "../../../context/AuthContext";
 import { AnimatePresence, motion } from "framer-motion";
-import { LBButton, LBCard } from "../../../components/ui/Primitives";
+import { LBButton, LBCard, LBInput } from "../../../components/ui/Primitives";
 import { ShoppingCart } from "lucide-react";
 import { Loading } from "../../../components/Loading";
+import { VariantDetails } from "../../components/VariantDetails";
+import { useInfoSociety } from "../../../context/InfoSocietyContext";
 
 export default function Page() {
   const params = useParams();
+  const infoSociety = useInfoSociety();
+
   const code_product = params.id as string;
+  const category_slug = params.category_slug as string;
   const { isDemo } = useAuth();
   const [product, setProduct] = useState<any>(null);
+  const [variant, setVariant] = useState<any>(null);
+  const [selectedVariant, setSelectedVariant] = useState<any>(null);
+  const [selectedAttrs, setSelectedAttrs] = useState<Record<
+    string,
+    string
+  > | null>(null);
   const [mainImage, setMainImage] = useState<string | null>(null);
+  const [quantity, setQuantity] = useState<number>(1);
+  const [inputQuantity, setInputQuantity] = useState<string>(String(1));
+  const [cartError, setCartError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const { isOpen, onOpenChange, onClose } = useDisclosure();
   useEffect(() => {
@@ -51,42 +65,100 @@ export default function Page() {
           setProduct(null);
           setIsLoading(false);
         });
+
+      fetch(`/api/product/variant?code_product=${code_product}`)
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.error) {
+            setVariant(null);
+
+            return;
+          }
+
+          setVariant(data || null);
+        })
+        .catch(() => {
+          setVariant(null);
+        });
     }
   }, [code_product]);
 
-  const addToCart = (item: any) => {
+  const addToCart = (item: any, qty = 1) => {
     const stored = localStorage.getItem("cart");
     const cart = stored ? JSON.parse(stored) : [];
+    // helper: shallow compare attributes objects (null/undefined treated as empty)
+    const attrsMatch = (
+      a: Record<string, any> | null | undefined,
+      b: Record<string, any> | null | undefined
+    ) => {
+      if (!a && !b) return true;
+      if (!a || !b) return false;
+      const aKeys = Object.keys(a);
+      const bKeys = Object.keys(b);
+      if (aKeys.length !== bKeys.length) return false;
+      return aKeys.every((k) => String(a[k]) === String(b[k]));
+    };
 
-    const existingItem = cart.find(
-      (cartItem: any) => cartItem.product_id === item.id
-    );
-    if (!existingItem) {
+    // Find existing cart item only if it's the same variant (same product_id AND same attributes)
+    const existingItem = cart.find((cartItem: any) => {
+      return (
+        cartItem.product_id === item.id &&
+        attrsMatch(cartItem.attributs_grouped, selectedAttrs ?? null)
+      );
+    });
+    const availableStock = item?.stock ?? product?.stock ?? 0;
+
+    // if item exists in cart, check sum of quantities
+    if (existingItem) {
+      if (existingItem.quantity + qty > availableStock) {
+        setCartError(
+          "Quantité dans le panier + demandée dépasse le stock disponible"
+        );
+        return;
+      }
+      existingItem.quantity += qty;
+      setCartError(null);
+    } else {
+      if (qty > availableStock) {
+        setCartError("Quantité demandée dépasse le stock disponible");
+        return;
+      }
+      // determine price based on canonical sale_price (assumed HT)
+      const taxRate = Number(item.tax_rate || 0);
+      const priceSource = Number(item.sale_price || 0);
+      // Treat sale_price as price HT (hors taxe) in data source.
+      const price_ht = priceSource;
+      const price_ttc = Number((price_ht * (1 + taxRate / 100)).toFixed(2));
+
       cart.push({
         name: item.name || null,
-        attributs_grouped: null,
+        attributs_grouped: selectedAttrs ?? null,
         image: item.image || null,
         description: item.description || null,
-        price_ht:
-          item && item.sale_price && item.tax_rate
-            ? Number(item.sale_price)
-            : item.sale_price,
-        price_ttc:
-          item && item.sale_price && item.tax_rate
-            ? calculPriceTTC(Number(item.sale_price), Number(item.tax_rate))
-            : item.sale_price,
+        price_ht: Number(price_ht),
+        price_ttc: Number(price_ttc),
         product_id: item.id || null,
-        quantity: 1,
+        quantity: qty,
         rang: cart.length + 1,
-        ref: item.code_product || null,
-        tva_tx: item.tax_rate || 0,
+        code_product: item.code_product || null,
+        path: `/boutique/${category_slug}/${item.code_product}`,
+        tva_tx: taxRate || 0,
       });
-    } else {
-      existingItem.quantity += 1;
+      setCartError(null);
     }
     localStorage.setItem("cart", JSON.stringify(cart));
     window.dispatchEvent(new Event("cartUpdated"));
   };
+
+  // clear cart error when selection or quantity changes
+  useEffect(() => {
+    setCartError(null);
+  }, [quantity, selectedVariant, selectedAttrs]);
+
+  // keep the textual input in sync when quantity changes programmatically
+  useEffect(() => {
+    setInputQuantity(String(quantity));
+  }, [quantity]);
 
   if (!product && isLoading) return <Loading />;
   if (!product && !isLoading) {
@@ -154,7 +226,7 @@ export default function Page() {
           </div>
         </div>
         {/* Infos produit */}
-        <LBCard className="hover:scale-105 hover:shadow-lg transition-all">
+        <LBCard className="hover:shadow-sm border-default-200 transition-all">
           <div className="flex flex-col items-start gap-1 p-4">
             <h1 className="text-3xl font-bold capitalize">{product.name}</h1>
             {product.code_product && (
@@ -162,71 +234,218 @@ export default function Page() {
                 Code produit : {product.code_product}
               </p>
             )}
+            {(selectedVariant?.sku ?? product.sku) && (
+              <div className="text-xs text-gray-400">
+                SKU : {selectedVariant?.sku ?? product.sku}
+              </div>
+            )}
           </div>
           <div className="space-y-4 p-4 h-full flex flex-col justify-between">
             {product.description && (
               <div
-                className="flex-1 prose prose-sm max-w-none text-black/80 dark:text-white/60"
+                className=" prose prose-sm max-w-none text-black/80 dark:text-white/60"
                 dangerouslySetInnerHTML={{
                   __html: product.description.replace(/\n/g, "<br/>"),
                 }}
               />
             )}
+            <div>
+              {variant && (
+                <VariantDetails
+                  variant={variant}
+                  onSelectionChange={(payload) => {
+                    setSelectedVariant(payload?.variant ?? null);
+                    setSelectedAttrs(payload?.attrs ?? null);
+                  }}
+                />
+              )}
+            </div>
+            <div className="mt-2">
+              <label className="block text-sm text-gray-500 mb-1">
+                Quantité
+              </label>
+              <div className="w-full">
+                <LBInput
+                  className="w-full"
+                  size="lg"
+                  value={inputQuantity}
+                  type="number"
+                  min={1}
+                  max={selectedVariant?.stock ?? product.stock ?? undefined}
+                  onChange={(e: any) => {
+                    // keep textual input while typing to avoid aggressive clamping
+                    setInputQuantity(e.target.value);
+                  }}
+                  onBlur={() => {
+                    // validate and clamp when user leaves the field
+                    const v = Number(inputQuantity);
+                    if (Number.isNaN(v) || v < 1) {
+                      setQuantity(1);
+                      setInputQuantity("1");
+                      return;
+                    }
+                    const maxStock =
+                      selectedVariant?.stock ?? product.stock ?? 1;
+                    const clamped = Math.max(
+                      1,
+                      Math.min(Math.floor(v), maxStock)
+                    );
+                    setQuantity(clamped);
+                    setInputQuantity(String(clamped));
+                  }}
+                  onKeyDown={(e: any) => {
+                    if (e.key === "Enter") {
+                      // same validation as onBlur
+                      const v = Number(inputQuantity);
+                      if (Number.isNaN(v) || v < 1) {
+                        setQuantity(1);
+                        setInputQuantity("1");
+                        return;
+                      }
+                      const maxStock =
+                        selectedVariant?.stock ?? product.stock ?? 1;
+                      const clamped = Math.max(
+                        1,
+                        Math.min(Math.floor(v), maxStock)
+                      );
+                      setQuantity(clamped);
+                      setInputQuantity(String(clamped));
+                    }
+                  }}
+                />
+              </div>
+              {quantity > (selectedVariant?.stock ?? product.stock ?? 0) && (
+                <div className="text-xs text-red-500 mt-1">
+                  Quantité supérieure au stock disponible
+                </div>
+              )}
+              {cartError && (
+                <div className="text-xs text-red-600 mt-1">{cartError}</div>
+              )}
+            </div>
             <div className="flex items-center justify-between gap-4 mt-2">
               <span className="text-xs text-gray-500">
-                {product.stock > 0
-                  ? "En stock (" + product.stock + " " + product.unit + ")"
-                  : "Rupture de stock"}
-              </span>
-              <span className="text-2xl font-bold text-primary">
-                {
-                  calculPriceTTC(
-                    Number(product.sale_price),
-                    Number(product.tax_rate)
-                  )
-                    .toFixed(2)
-                    .split(".")[0]
-                }
-                .
-                <span className="text-xl font-regular">
-                  {
-                    calculPriceTTC(
-                      Number(product.sale_price),
-                      Number(product.tax_rate)
-                    )
-                      .toFixed(2)
-                      .split(".")[1]
+                {(() => {
+                  const availableStock =
+                    selectedVariant?.stock ?? product.stock;
+                  if (availableStock > 0) {
+                    const unit = selectedVariant ? "" : " " + product.unit;
+                    return `En stock (${availableStock}${unit})`;
                   }
-                </span>{" "}
-                €
+                  return "Rupture de stock";
+                })()}
               </span>
+              <div>
+                {infoSociety?.tva === true ? (
+                  (() => {
+                    const priceSource = Number(
+                      selectedVariant?.sale_price ?? product.sale_price
+                    );
+                    const priceHT = priceSource;
+                    const priceTTC = calculPriceTTC(
+                      Number(priceHT),
+                      Number(product.tax_rate)
+                    ).toFixed(2);
+                    const priceHTStr = Number(priceHT).toFixed(2);
+                    return (
+                      <div className="text-end">
+                        <div className="text-sm text-gray-500 mb-1">
+                          HT {priceHTStr} €
+                        </div>
+                        <span className="text-2xl font-bold text-primary">
+                          {priceTTC.split(".")[0]}.
+                          <span className="text-xl font-regular">
+                            {priceTTC.split(".")[1]}
+                          </span>{" "}
+                          €
+                          <span className="text-xs text-inline text-gray-500 ml-2">
+                            TTC
+                          </span>
+                        </span>
+                      </div>
+                    );
+                  })()
+                ) : infoSociety?.tva === false ? (
+                  <div className="text-end">
+                    <span className="text-2xl font-bold text-primary">
+                      {(() => {
+                        const priceSource =
+                          selectedVariant?.sale_price ?? product.sale_price;
+                        // priceSource is HT in this mode
+                        const priceHT = Number(priceSource).toFixed(2);
+                        return (
+                          <>
+                            {priceHT.split(".")[0]}.
+                            <span className="text-xl font-regular">
+                              {priceHT.split(".")[1]}
+                            </span>{" "}
+                            €
+                          </>
+                        );
+                      })()}
+                    </span>
+                    <div className="text-xs text-gray-500">
+                      Assujetti à la TVA
+                    </div>
+                  </div>
+                ) : (
+                  // fallback: display TTC only (legacy behaviour)
+                  <span className="text-2xl font-bold text-primary">
+                    {(() => {
+                      const priceSource =
+                        selectedVariant?.sale_price ?? product.sale_price;
+                      const priceTTC = calculPriceTTC(
+                        Number(priceSource),
+                        Number(product.tax_rate)
+                      ).toFixed(2);
+                      return (
+                        <>
+                          {priceTTC.split(".")[0]}.
+                          <span className="text-xl font-regular">
+                            {priceTTC.split(".")[1]}
+                          </span>{" "}
+                          €
+                        </>
+                      );
+                    })()}
+                  </span>
+                )}
+              </div>
             </div>
-            {product.sku && (
-              <div className="text-xs text-gray-400">SKU : {product.sku}</div>
-            )}
+
             {isDemo && (
               <div className="text-xs text-red-500">
                 Mode démo activé, impossible d'ajouter au panier.
               </div>
             )}
-            {product.stock > 0 && (
+            {(selectedVariant?.stock ?? product.stock) > 0 && (
               <LBButton
                 isDisabled={isDemo}
                 color="success"
-                disabled={product.stock < 1}
-                onPress={() => addToCart(product)}
+                disabled={
+                  (selectedVariant?.stock ?? product.stock) < 1 ||
+                  quantity > (selectedVariant?.stock ?? product.stock ?? 0)
+                }
+                onPress={() =>
+                  addToCart(
+                    selectedVariant
+                      ? { ...product, ...selectedVariant }
+                      : product,
+                    quantity
+                  )
+                }
                 startContent={<ShoppingCart size={16} />}
                 size="lg"
               >
                 Ajouter au panier
               </LBButton>
             )}
-            {product.stock === 0 && (
+            {(selectedVariant?.stock ?? product.stock) === 0 && (
               <Tooltip content=" Pas de stock ">
                 <LBButton
                   isDisabled={isDemo}
                   className="!opacity-40 !hover:opacity-40"
-                  disabled={product.stock < 1}
+                  disabled={(selectedVariant?.stock ?? product.stock) < 1}
                   size="lg"
                   color="success"
                   startContent={<ShoppingCart size={16} />}

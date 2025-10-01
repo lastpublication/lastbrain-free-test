@@ -4,6 +4,7 @@ import {
   Card,
   CardBody,
   CardFooter,
+  Chip,
   Image,
   Input,
   Link,
@@ -17,7 +18,13 @@ import { useEffect, useState } from "react";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import { LoginForm } from "../components/LoginForm";
+import Signup from "../components/Signup";
+import CartStep from "./step/cart";
+import LoginStep from "./step/login";
+import DeliveryStep from "./step/delivery";
+import PurchaseStep from "./step/purchase";
 import { useAuth } from "../context/AuthContext";
+import { useInfoSociety } from "../context/InfoSocietyContext";
 import {
   LBButton,
   LBCard,
@@ -26,13 +33,16 @@ import {
 } from "../components/ui/Primitives";
 
 export default function PanierPage() {
-  const { user, isDemo } = useAuth();
+  const { user, isDemo, isMobile } = useAuth();
+  const infoSociety = useInfoSociety();
   const [cart, setCart] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
   const searchParams = useSearchParams();
   const [totalCartHT, setTotalCartHT] = useState(0);
   const [totalCartTTC, setTotalCartTTC] = useState(0);
+  const [step, setStep] = useState<number>(0); // 0: cart, 1: login, 2: delivery, 3: purchase
+  const [shipping, setShipping] = useState<any>(null);
   const [customerSociety] = useState({
     society: "",
     last_name: "",
@@ -50,24 +60,51 @@ export default function PanierPage() {
   useEffect(() => {
     const stored = localStorage.getItem("cart");
     if (stored) {
-      setCart(JSON.parse(stored));
-      setTotalCartHT(
-        JSON.parse(stored)
-          .reduce(
-            (acc: number, item: any) => acc + item.price_ht * item.quantity,
-            0
-          )
-          .toFixed(2)
+      const parsed = JSON.parse(stored);
+      setCart(parsed);
+      const ht = parsed.reduce(
+        (acc: number, item: any) =>
+          acc + Number(item.price_ht) * Number(item.quantity),
+        0
       );
-      setTotalCartTTC(
-        JSON.parse(stored)
-          .reduce(
-            (acc: number, item: any) => acc + item.price_ttc * item.quantity,
-            0
-          )
-          .toFixed(2)
+      const ttc = parsed.reduce(
+        (acc: number, item: any) =>
+          acc + Number(item.price_ttc) * Number(item.quantity),
+        0
       );
+      setTotalCartHT(Number(ht.toFixed(2)));
+      setTotalCartTTC(Number(ttc.toFixed(2)));
     }
+    // auto-advance to delivery if user already logged in
+    if (user) setStep(2);
+  }, []);
+
+  useEffect(() => {
+    const onCartUpdated = () => {
+      const stored = localStorage.getItem("cart");
+      if (!stored) {
+        setCart([]);
+        setTotalCartHT(0);
+        setTotalCartTTC(0);
+        return;
+      }
+      const parsed = JSON.parse(stored);
+      setCart(parsed);
+      const ht = parsed.reduce(
+        (acc: number, item: any) =>
+          acc + Number(item.price_ht) * Number(item.quantity),
+        0
+      );
+      const ttc = parsed.reduce(
+        (acc: number, item: any) =>
+          acc + Number(item.price_ttc) * Number(item.quantity),
+        0
+      );
+      setTotalCartHT(Number(ht.toFixed(2)));
+      setTotalCartTTC(Number(ttc.toFixed(2)));
+    };
+    window.addEventListener("cartUpdated", onCartUpdated);
+    return () => window.removeEventListener("cartUpdated", onCartUpdated);
   }, []);
 
   useEffect(() => {
@@ -85,22 +122,6 @@ export default function PanierPage() {
       const updatedCart = JSON.parse(stored);
       setCart(updatedCart);
       window.dispatchEvent(new Event("cartUpdated"));
-      setTotalCartHT(
-        updatedCart
-          .reduce(
-            (acc: number, item: any) => acc + item.price_ht * item.quantity,
-            0
-          )
-          .toFixed(2)
-      );
-      setTotalCartTTC(
-        updatedCart
-          .reduce(
-            (acc: number, item: any) => acc + item.price_ttc * item.quantity,
-            0
-          )
-          .toFixed(2)
-      );
     }
   };
 
@@ -135,12 +156,15 @@ export default function PanierPage() {
       ...values,
       name: `${values.first_name} ${values.last_name}`,
     };
+    const shippingFee = Number(shipping?.fee_ttc || 0);
+    const amount = Number((Number(totalCartTTC) + shippingFee).toFixed(2));
 
     axios
       .get("/api/paiement", {
         params: {
-          amount: cart.reduce((acc, item) => acc + item.sale_price, 0),
+          amount,
           cart: JSON.stringify(cart),
+          shipping: JSON.stringify(shipping),
           note: customerSociety.note,
           customer: JSON.stringify(customer),
         },
@@ -157,319 +181,143 @@ export default function PanierPage() {
   };
 
   return (
-    <div className="max-w-2xl mx-auto p-6">
+    <div className="max-w-6xl mx-auto p-6">
       <h1 className="text-2xl font-bold mb-6">Mon panier</h1>
 
       {cart.length === 0 ? (
         <p>Votre panier est vide.</p>
       ) : (
-        <>
-          <ul className="divide-y">
-            {cart.map((item, index) => (
-              <li
-                key={`${item.id}-${index}`}
-                className="py-4 gap-4 flex  flex-col md:flex-row  justify-between items-center dark:border-t-white/20"
-              >
-                <div className="w-full flex flex-col md:flex-row items-center justify-between gap-4">
-                  <div className="font-semibold">
-                    <div className="flex items-center gap-8">
-                      <Link
-                        href={`/produit/${item.code_product}`}
-                        className="flex-shrink-0"
-                      >
-                        <Image
-                          src={item.image}
-                          alt={item.name}
-                          loading="lazy"
-                          className="w-16 h-16 object-cover rounded"
-                        />
-                        <div className="flex flex-col gap-1">
-                          <p className="font-semibold text-xl uppercase">
-                            {item.name}
-                          </p>
-                          <p className="text-xs text-gray-500">{item.ref}</p>
-                        </div>
-                      </Link>
-                    </div>
-                  </div>
-                  <div>
-                    <NumberInput
-                      value={item.quantity}
-                      min={1}
-                      onChange={(value) => {
-                        const updated = cart.map((cartItem) =>
-                          cartItem.id === item.id
-                            ? { ...cartItem, quantity: value }
-                            : cartItem
-                        );
-                        setCart(updated);
-                        localStorage.setItem("cart", JSON.stringify(updated));
-                        refreshCart();
-                      }}
-                    />
-                  </div>
-                  <div className="text-md flex items-center gap-3 space-x-5 font-bold text-foreground text-end">
-                    {item.price_ttc.toFixed(2)} €
-                    <LBButton
-                      isIconOnly
-                      color="danger"
-                      onPress={() => removeFromCart(index)}
-                    >
-                      <Trash2 size={16} />
-                    </LBButton>
-                  </div>
-                </div>
-              </li>
-            ))}
-          </ul>
+        <div className="grid md:grid-cols-3 gap-8">
+          <div className="md:col-span-2">
+            {/* Stepper content */}
+            {step === 0 && (
+              <CartStep
+                cart={cart}
+                onNext={() => setStep(1)}
+                onChangeQuantity={(index: number, qty: number) => {
+                  const updated = cart.map((c, i) =>
+                    i === index ? { ...c, quantity: qty } : c
+                  );
+                  setCart(updated);
+                  localStorage.setItem("cart", JSON.stringify(updated));
+                  refreshCart();
+                }}
+                onRemove={(index: number) => {
+                  removeFromCart(index);
+                }}
+              />
+            )}
 
-          <div className="w-full  border-t dark:border-t-white/20 pt-4 mb-24">
-            <div className="flex flex-col items-end">
-              {" "}
-              <div className="w-1/2 flex justify-between items-center gap-4">
-                <div className="font-thin text-end text-foreground-400">
-                  Total HT :
-                </div>
-                <div className=" text-end text-foreground-400">
-                  {totalCartHT} €
-                </div>
-              </div>
-              <div className="w-1/2 flex justify-between items-center gap-4">
-                <div className="font-thin text-end text-foreground-400">
-                  Total TVA :
-                </div>
-                <div className=" text-end text-foreground-400">
-                  {Number(totalCartTTC - totalCartHT).toFixed(2)} €
-                </div>
-              </div>
-              <div className="w-1/2 flex justify-between items-center gap-4">
-                <div className="font-semibold text-end">Total TTC :</div>
-                <div className="font-bold text-end">{totalCartTTC} €</div>
-              </div>
-            </div>
-          </div>
-          {!user && (
-            <>
-              <LoginForm />
-              <LBCard className="my-6">
-                <div className="p-5">
-                  <Formik
-                    initialValues={customerSociety}
-                    validationSchema={validationSchema}
-                    onSubmit={createPayment}
-                    enableReinitialize
-                  >
-                    {({
-                      isValid,
-                      dirty,
-                      values,
-                      handleChange,
-                      isSubmitting,
-                      errors,
-                      touched,
-                      submitCount,
-                    }) => (
-                      <Form className=" space-y-4">
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                          <LBInput
-                            size="lg"
-                            label="Société"
-                            name="society"
-                            placeholder="Nom de la société"
-                            className="input input-bordered w-full col-span-2 md:col-span-1"
-                            value={values.society}
-                            onChange={handleChange}
-                          />
+            {step === 1 && <LoginStep user={user} onNext={() => setStep(2)} />}
 
-                          <LBInput
-                            size="lg"
-                            label="Nom *"
-                            name="last_name"
-                            placeholder="Nom"
-                            className="input input-bordered w-full col-span-2 md:col-span-1"
-                            isInvalid={Boolean(
-                              (touched.last_name || submitCount > 0) &&
-                                errors.last_name
-                            )}
-                            errorMessage={
-                              ((touched.last_name || submitCount > 0) &&
-                                errors.last_name) ||
-                              ""
-                            }
-                            value={values.last_name}
-                            onChange={handleChange}
-                          />
+            {step === 2 && (
+              <DeliveryStep
+                cart={cart}
+                onBack={() => setStep(1)}
+                onNext={() => setStep(3)}
+                onSelect={(opt: any) => setShipping(opt)}
+              />
+            )}
 
-                          <LBInput
-                            size="lg"
-                            label="Prénom *"
-                            name="first_name"
-                            placeholder="Prénom"
-                            className="input input-bordered w-full col-span-2 md:col-span-1"
-                            isInvalid={Boolean(
-                              (touched.first_name || submitCount > 0) &&
-                                errors.first_name
-                            )}
-                            errorMessage={
-                              ((touched.first_name || submitCount > 0) &&
-                                errors.first_name) ||
-                              ""
-                            }
-                            value={values.first_name}
-                            onChange={handleChange}
-                          />
-
-                          <LBInput
-                            size="lg"
-                            label="Email *"
-                            name="email"
-                            type="email"
-                            placeholder="Email"
-                            className="input input-bordered w-full col-span-2 md:col-span-1"
-                            isInvalid={Boolean(
-                              (touched.email || submitCount > 0) && errors.email
-                            )}
-                            errorMessage={
-                              ((touched.email || submitCount > 0) &&
-                                errors.email) ||
-                              ""
-                            }
-                            value={values.email}
-                            onChange={handleChange}
-                          />
-
-                          <LBInput
-                            size="lg"
-                            label="Téléphone *"
-                            name="phone"
-                            placeholder="Téléphone"
-                            className="input input-bordered w-full col-span-2 md:col-span-1"
-                            isInvalid={Boolean(
-                              (touched.phone || submitCount > 0) && errors.phone
-                            )}
-                            errorMessage={
-                              ((touched.phone || submitCount > 0) &&
-                                errors.phone) ||
-                              ""
-                            }
-                            value={values.phone}
-                            onChange={handleChange}
-                          />
-
-                          <LBInput
-                            size="lg"
-                            label="Adresse *"
-                            name="address"
-                            placeholder="Adresse"
-                            className="input input-bordered w-full col-span-2 md:col-span-1"
-                            isInvalid={Boolean(
-                              (touched.address || submitCount > 0) &&
-                                errors.address
-                            )}
-                            errorMessage={
-                              ((touched.address || submitCount > 0) &&
-                                errors.address) ||
-                              ""
-                            }
-                            value={values.address}
-                            onChange={handleChange}
-                          />
-
-                          <LBInput
-                            size="lg"
-                            label="Ville  *"
-                            name="city"
-                            placeholder="Ville"
-                            className="input input-bordered w-full col-span-2 md:col-span-1"
-                            isInvalid={Boolean(
-                              (touched.city || submitCount > 0) && errors.city
-                            )}
-                            errorMessage={
-                              ((touched.city || submitCount > 0) &&
-                                errors.city) ||
-                              ""
-                            }
-                            value={values.city}
-                            onChange={handleChange}
-                          />
-
-                          <LBInput
-                            size="lg"
-                            label="Code postal *"
-                            name="zip_code"
-                            placeholder="Code postal"
-                            className="input input-bordered w-full col-span-2 md:col-span-1"
-                            isInvalid={Boolean(
-                              (touched.zip_code || submitCount > 0) &&
-                                errors.zip_code
-                            )}
-                            errorMessage={
-                              ((touched.zip_code || submitCount > 0) &&
-                                errors.zip_code) ||
-                              ""
-                            }
-                            value={values.zip_code}
-                            onChange={handleChange}
-                          />
-
-                          <LBTextarea
-                            size="lg"
-                            label="Commentaire"
-                            name="note"
-                            placeholder="Commentaire"
-                            className="input input-bordered w-full col-span-2 md:col-span-2"
-                            value={values.note}
-                            onChange={handleChange}
-                          />
-                        </div>
-                        <div className="flex justify-end">
-                          <LBButton
-                            type="submit"
-                            color="success"
-                            disabled={isDemo}
-                            className="w-full"
-                            isLoading={isLoading}
-                            size="lg"
-                            isDisabled={isSubmitting || cart.length === 0}
-                          >
-                            <CreditCard size={16} />
-                            Payer
-                          </LBButton>
-                          {isDemo && (
-                            <span className="text-sm text-gray-500">
-                              " (Demo Mode)"
-                            </span>
-                          )}
-                        </div>
-                      </Form>
-                    )}
-                  </Formik>
-                </div>
-              </LBCard>
-            </>
-          )}
-
-          {user && (
-            <div className="flex justify-end mt-8">
-              <Button
-                type="submit"
-                color="success"
-                disabled={isDemo}
-                className="w-full rounded-md"
+            {step === 3 && (
+              <PurchaseStep
+                cart={cart}
+                shipping={shipping}
+                totalTTC={Number(totalCartTTC) + Number(shipping?.fee_ttc || 0)}
+                onBack={() => setStep(2)}
+                onPay={() => {
+                  // open signup if not user
+                  if (!user) setStep(1);
+                }}
                 isLoading={isLoading}
-                size="lg"
-                isDisabled={cart.length === 0}
-                onPress={() => createPayment(user)}
-              >
-                <CreditCard size={16} />
-                Payer
-              </Button>
-              {isDemo && (
-                <span className="text-sm text-gray-500">" (Demo Mode)"</span>
+              />
+            )}
+          </div>
+
+          {/* Right: totals & checkout (sticky on desktop) */}
+          <aside className="md:col-span-1">
+            <LBCard className="md:sticky md:top-24  p-6">
+              <h2 className="text-lg font-semibold mb-4">Cart Totals</h2>
+              <div className="flex justify-between text-sm text-foreground-400">
+                <div>Subtotal (HT)</div>
+                <div className="font-semibold">{totalCartHT.toFixed(2)} €</div>
+              </div>
+
+              {infoSociety?.tva !== false && (
+                <div className="flex justify-between text-sm text-foreground-400 mt-2">
+                  <div>Tax</div>
+                  <div className="font-semibold">
+                    {Number(Number(totalCartTTC) - Number(totalCartHT)).toFixed(
+                      2
+                    )}{" "}
+                    €
+                  </div>
+                </div>
               )}
-            </div>
-          )}
-        </>
+
+              <div className="flex justify-between text-sm text-foreground-400 mt-2">
+                <div>Frais de port</div>
+                <div className="font-semibold">
+                  {(shipping?.fee_ttc || 0).toFixed(2)} €
+                </div>
+              </div>
+
+              <div className="border-t mt-4 pt-4 flex justify-between items-center">
+                <div className="font-semibold">Total (TTC)</div>
+                <div className="text-xl font-bold">
+                  {(
+                    Number(totalCartTTC) + Number(shipping?.fee_ttc || 0)
+                  ).toFixed(2)}{" "}
+                  €
+                </div>
+              </div>
+
+              <div className="mt-6">
+                {step < 1 && (
+                  <LBButton
+                    color="success"
+                    className="w-full"
+                    isDisabled={cart.length === 0}
+                    onPress={() => setStep(1)}
+                  >
+                    Continuer
+                  </LBButton>
+                )}
+                {step >= 1 && (
+                  <LBButton
+                    color="success"
+                    className="w-full"
+                    isDisabled={cart.length === 0}
+                    onPress={() => {
+                      if (!user) {
+                        // prompt login/signup
+                        setStep(1);
+                        return;
+                      }
+                      // if user logged -> go to delivery or purchase
+                      if (step < 2) setStep(2);
+                      else if (step === 2) setStep(3);
+                    }}
+                  >
+                    Continuer
+                  </LBButton>
+                )}
+                {user && step === 3 && (
+                  <Button
+                    type="submit"
+                    color="success"
+                    className="w-full mt-2"
+                    isLoading={isLoading}
+                    isDisabled={cart.length === 0}
+                    onPress={() => createPayment(customerSociety)}
+                  >
+                    <CreditCard size={16} /> Payer
+                  </Button>
+                )}
+              </div>
+            </LBCard>
+          </aside>
+        </div>
       )}
     </div>
   );

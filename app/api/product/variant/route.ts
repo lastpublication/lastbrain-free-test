@@ -7,8 +7,7 @@ export async function GET(request: Request) {
 
   const { searchParams } = new URL(request.url);
   const code_product = searchParams.get("code_product");
-  const page = searchParams.get("page") || "1";
-  const limit = searchParams.get("limit") || "10";
+
   if (!token || !apiUrl) {
     return new Response(JSON.stringify({ error: "Missing token or API URL" }), {
       status: 500,
@@ -21,10 +20,9 @@ export async function GET(request: Request) {
     let response;
     if (code_product) {
       // Récupération d'un produit par ID
-      response = await axios.get(`${apiUrl}api/product`, {
+      response = await axios.get(`${apiUrl}api/product/variant`, {
         params: {
-          filter: `code_product=${code_product},status=active`,
-          limit: 1,
+          code_product: `${code_product}`,
         },
         headers: {
           "x-lastbrain-token": token,
@@ -34,18 +32,12 @@ export async function GET(request: Request) {
         },
       });
 
-      response = response.data[0] || null;
+      response = response.data || null;
     } else {
-      // Récupération paginée
-      response = await axios.get(`${apiUrl}/api/product`, {
-        params: { page, limit, filter: "status=active" },
-        headers: {
-          "x-lastbrain-token": token,
-          origin: request.headers.get("referer")
-            ? new URL(request.headers.get("referer")!).origin
-            : undefined,
-        },
-      });
+      return NextResponse.json(
+        { error: "Missing code_product" },
+        { status: 400 }
+      );
     }
 
     return NextResponse.json(response, {

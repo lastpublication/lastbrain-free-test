@@ -11,6 +11,7 @@
     "ci-check": "pnpm install --frozen-lockfile && pnpm run type-check && pnpm run build"
   },
   "dependencies": {
+    "@hcaptcha/react-hcaptcha": "^1.12.1",
     "@heroui/button": "2.2.26",
     "@heroui/card": "2.2.24",
     "@heroui/chip": "2.2.21",

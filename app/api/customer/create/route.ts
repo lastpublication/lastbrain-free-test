@@ -7,15 +7,30 @@ export async function POST(request: Request) {
 
   // Normalize URL join to avoid missing or double slashes
   const base = apiUrl.endsWith("/") ? apiUrl : apiUrl + "/";
-  const endpoint = base + "api/auth/customer";
+  const endpoint = base + "api/auth/customer/signup";
 
   try {
-    const { email, password, captchaToken } = await request.json();
+    const {
+      email,
+      password,
+      captchaToken,
+      customer: incomingCustomer,
+    } = await request.json();
+
+    // Build customer payload: prefer explicit `customer` object but merge email/password
+    const customer = { ...(incomingCustomer ?? {}) } as Record<string, any>;
+    if (email) customer.email = email;
+    if (password) customer.password = password;
     // Return the promise chain so the route returns the NextResponse produced in .then or .catch
     return axios
       .post(
         endpoint,
-        { email, password, captchaToken },
+        {
+          email,
+          password,
+          customer,
+          captchaToken,
+        },
         {
           headers: {
             "Content-Type": "application/json",
@@ -57,7 +72,7 @@ export async function POST(request: Request) {
 
           return NextResponse.json(
             {
-              error: "Erreur lors de la connexion",
+              error: "Erreur lors de la création",
               details: payload,
             },
             { status }
@@ -66,7 +81,7 @@ export async function POST(request: Request) {
 
         return NextResponse.json(
           {
-            error: "Erreur lors de la connexion",
+            error: "Erreur lors de la création",
             details: err?.message || "Une erreur est survenue",
           },
           { status: 500 }
@@ -100,7 +115,7 @@ export async function POST(request: Request) {
     // Fallback for non-Axios errors
     return NextResponse.json(
       {
-        error: "Erreur lors de la connexion",
+        error: "Erreur lors de la création",
         details: err?.message || "Une erreur est survenue",
       },
       { status: 500 }
