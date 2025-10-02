@@ -284,7 +284,7 @@ export const Signup: React.FC<Props> = ({ cart = false, onSuccess }) => {
                 onChange={handleChange}
               />
             </div>
-            <div className="mx-auto my-4">
+            <div className="flex justify-center my-4">
               <HCaptcha
                 ref={hcaptchaRef}
                 sitekey={process.env.NEXT_PUBLIC_HCAPTCHA_SITE_KEY!}
@@ -301,7 +301,7 @@ export const Signup: React.FC<Props> = ({ cart = false, onSuccess }) => {
             <div className="flex justify-end">
               <LBButton
                 type="submit"
-                color="success"
+                color="default"
                 className="w-full"
                 isLoading={isLoading}
                 size="lg"

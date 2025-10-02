@@ -142,7 +142,7 @@ export const LoginForm = () => {
                 value={values.password}
                 onChange={handleChange}
               />
-              <div className="mx-auto my-4">
+              <div className="flex justify-center my-4">
                 <HCaptcha
                   ref={hcaptchaRef}
                   sitekey={process.env.NEXT_PUBLIC_HCAPTCHA_SITE_KEY!}
@@ -158,7 +158,7 @@ export const LoginForm = () => {
               </div>
               <LBButton
                 type="submit"
-                color="success"
+                color="default"
                 className="w-full"
                 size="lg"
                 isLoading={isLoading}
